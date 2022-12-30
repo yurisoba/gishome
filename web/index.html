@@ -1,92 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>GIShome 24h Query</title>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css'
-          rel='stylesheet'/>
-</head>
-<body>
-<div id="map" style="width: 800px; height: 600px"></div>
 
-<script src='https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js'></script>
-<script src="https://unpkg.com/h3-js"></script>
-<script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiYmVuYm9iIiwiYSI6ImNsYTdwaHYxZzAzOXczbnBiajd4dGY0dmoifQ.WG0YjdTUn9uqchxX9YFgaQ';
-    const map = new mapboxgl.Map({
-        container: "map",
-        style: "mapbox://styles/benbob/clbs6pvt6000515pbjslxd3l3",
-        center: [121.128, 23.633],
-        zoom: 7,
-    });
+    <!-- mapbox -->
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/h3-js"></script>
+    <!-- mapbox -->
 
-    function hexToFeature(hex) {
-        const bounds = h3.cellToBoundary(hex.id);
-        const coords = bounds.map(coord => [coord[1], coord[0]]);
-        return {
-            type: "Feature",
-            properties: {
-                id: hex.id,
-                count: hex.count,
-            },
-            geometry: {
-                type: "Polygon",
-                coordinates: [coords.concat([coords[0]])],
-            }
-        };
-    }
+    <!-- vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="./vue/components.js" type="module"></script>
+    <!-- vue -->
 
-    map.on("load", async () => {
-        const gj = {
-            "type": "FeatureCollection",
-            "features": [],
-        };
-
-        const hexes = await (await fetch("/hexes")).json();
-        hexes.forEach(hex => {
-            gj.features.push(hexToFeature(hex));
-        });
-
-        map.addSource("hexes", {
-            type: "geojson",
-            data: gj,
-        });
-
-        map.addLayer({
-            id: "hexes-layer",
-            type: "fill",
-            source: "hexes",
-            paint: {
-                "fill-color": "rgba(255, 255, 255, 0.8)",
-                "fill-outline-color": "rgb(0, 0, 0)",
-            }
-        });
-
-        map.addLayer({
-            id: "hexes-sales-layer",
-            type: "symbol",
-            source: "hexes",
-            layout: {
-                "text-field": "{count}",
-                "text-size": 10,
-            }
-        });
-
-        map.on("click", "hexes-layer", async (e) => {
-            new mapboxgl.Popup()
-                .setLngLat(e.lngLat)
-                .setHTML("Clicked on hex ID: " + e.features[0].properties.id)
-                .addTo(map);
-        });
-
-        map.on("mouseenter", "hexes-layer", () => {
-            map.getCanvas().style.cursor = "pointer";
-        });
-
-        map.on("mouseleave", "hexes-layer", () => {
-            map.getCanvas().style.cursor = "";
-        });
-    });
-</script>
-</body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Circulo de Hadas App</h1>
+    </header>
+    <section id="app_component">
+      <Info />
+    </section>
+  </body>
 </html>

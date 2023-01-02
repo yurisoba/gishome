@@ -114,7 +114,7 @@ Vue.component("Map", {
       }
 
       current.forEach((hexId) => {
-        hexId = isNaN(hexId) ? Number("0x" + hexId) : hexId;
+        hexId = isNaN(hexId) ? Number("0x" + hexId.substr(2)) : hexId;
         this.map.setFeatureState(
           { source: "hexes", id: hexId },
           { selected: 1 }
@@ -125,7 +125,7 @@ Vue.component("Map", {
     hexToFeature(hex) {
       const bounds = h3.cellToBoundary(hex.id);
       const coords = bounds.map((coord) => [coord[1], coord[0]]);
-      const intid = Number("0x" + hex.id);
+      const intid = Number("0x" + hex.id.substr(2));
       return {
         type: "Feature",
         id: intid,

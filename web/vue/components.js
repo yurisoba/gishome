@@ -28,7 +28,8 @@ Vue.component("Info", {
       }
     },
     async getMostProduct(hexId) {
-      const product = await (await fetch(`/most/${hexId}`)).json();
+      const hstr = "85" + hexId.toString(16);
+      const product = await (await fetch(`/most/${hstr}`)).json();
       this.product = product;
       this.hexagons = [hexId];
     },

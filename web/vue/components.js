@@ -1,3 +1,5 @@
+let mmap;
+
 import "./map.js";
 import "./form.js";
 

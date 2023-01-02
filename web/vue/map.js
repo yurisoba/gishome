@@ -56,6 +56,14 @@ Vue.component("Map", {
         data: gj,
       });
 
+      hexes.forEach((hex) => {
+        const intid = Number("0x" + hex.id);
+        this.map.setFeatureState(
+            { source: "hexes", id: intid },
+            { selected: 0 }
+        );
+      });
+
       this.map.addLayer({
         id: "hexes-layer",
         type: "fill",
@@ -63,7 +71,7 @@ Vue.component("Map", {
         paint: {
           "fill-color": [
             "case",
-            ["boolean", ["feature-state", "selected"], true],
+            ["==", ["feature-state", "selected"], 1],
             "rgba(123, 240, 134, 0.5)", //green
             "rgba(255, 255, 255, 0.2)", // white
           ],
@@ -98,6 +106,18 @@ Vue.component("Map", {
       this.map.on("mouseleave", "hexes-layer", () => {
         this.map.getCanvas().style.cursor = "";
       });
+
+
+      setTimeout(() => {
+        const intid = Number("0x" + "854bb1bbfffffff");
+        console.log(intid);
+        console.log("LIGHTUP!");
+        this.map.setFeatureState(
+            { source: "hexes", id: intid },
+            { selected: 1 }
+        );
+      }, 5000);
+
     });
   },
   methods: {
@@ -107,11 +127,12 @@ Vue.component("Map", {
     hexToFeature(hex) {
       const bounds = h3.cellToBoundary(hex.id);
       const coords = bounds.map((coord) => [coord[1], coord[0]]);
+      const intid = Number("0x" + hex.id);
       return {
         type: "Feature",
-        id: hex.id,
+        id: intid,
         properties: {
-          id: hex.id,
+          id: intid,
           count: hex.count,
         },
         geometry: {

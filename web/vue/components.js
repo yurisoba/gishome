@@ -5,12 +5,18 @@ Vue.component("Info", {
   name: "info",
   data() {
     return {
-      product: {},
-      hexagon: {},
+      product: [],
+      hexagons: [],
+      actionType: "init",
     };
   },
   methods: {
+    onHexClick(hexData) {
+      this.getMostProduct(hexData.id);
+    },
     onFormSubmit(formData) {
+      this.actionType = formData.picked;
+
       switch (formData.picked) {
         case "id":
           this.findProductHex(formData.productId);
@@ -21,30 +27,28 @@ Vue.component("Info", {
           break;
       }
     },
-    onHexClick(hexData) {
-      this.getMostProduct(hexData.id);
-    },
     async getMostProduct(hexId) {
       const product = await (await fetch(`/most/${hexId}`)).json();
       this.product = product;
+      this.hexagons = [hexId];
     },
     async findProduct(p_name) {
       const product = await (await fetch(`/product/${p_name}`)).json();
       this.product = product;
     },
     async findProductHex(p_id) {
-      const hexagon = await (await fetch(`/hex/${p_id}`)).json();
-      this.hexagon = hexagon;
-      this.product = { ...this.product, hex: hexagon };
+      const hexagons = await (await fetch(`/hex/${p_id}`)).json();
+      this.hexagons = hexagons;
+      this.product = [];
     },
   },
   template: `
   <div class="main-container">
-    <Map @hexClick="onHexClick"/>
+    <Map @hexClick="onHexClick" v-bind:hexagons="hexagons"/>
     <div class="info-container col">
       <div class="information">
         <Form v-bind:form_values="product" @submit="onFormSubmit"/>
-        <Results v-bind:results_prop="product"/>
+        <Results v-bind:results_prop="product" v-bind:actionType="actionType" v-bind:hexagons="hexagons"/>
       </div>
     </div>
 </div>
@@ -52,13 +56,20 @@ Vue.component("Info", {
 });
 
 Vue.component("Results", {
-  props: ["results_prop"],
+  props: ["results_prop", "hexagons", "actionType"],
   template: `<div class="results">
-  <ul>
-    <li v-for="(value, key, i) in results_prop"  v-bind:key="i">
-      <b>{{ key }}:</b> {{ value }}
-    </li>
-  </ul>
+    <ul class="result-list" v-if="results_prop.length > 0">
+      <li class="item" v-for="(values, i) in results_prop"  v-bind:key="i">
+        <div class="key"><span class="number">{{i}}</span></div>
+        <div class="info">
+          <span class="data" v-for="(val, key, j) in values" v-bind:key="j">
+            <b>{{ key }}:</b> {{ val }}
+          </span>
+        </div>
+      </li>
+    </ul>
+    <div v-else-if="actionType=='name'"><span>200 No results 🙃</span></div>
+    <div v-else-if="actionType=='id' && hexagons.length == 0"><span>404 Id not found 😭</span></div>
   </div>`,
 });
 

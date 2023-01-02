@@ -68,8 +68,12 @@ Vue.component("Results", {
         </div>
       </li>
     </ul>
-    <div v-else-if="actionType=='name'"><span>200 No results 🙃</span></div>
-    <div v-else-if="actionType=='id' && hexagons.length == 0"><span>404 Id not found 😭</span></div>
+    <div class="center" v-else-if="actionType=='name'">
+      <span>200 No results 🙃</span>
+    </div>
+    <div class="center" v-else-if="actionType=='id' && hexagons.length == 0">
+      <span>404 Id not found 😭</span>
+    </div>
   </div>`,
 });
 

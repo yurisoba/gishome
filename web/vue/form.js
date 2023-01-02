@@ -19,7 +19,7 @@ Vue.component("Form", {
     productId(value) {
       this.productId = value;
       this.msg["productId"] = "";
-      if (!value.match(/[0-9A-Fa-f]{6}/g)) {
+      if (isNaN(value) && !value.match(/[0-9A-Fa-f]{6}/g)) {
         this.msg["productId"] = "Please enter a valid product Id";
       }
     },

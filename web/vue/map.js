@@ -9,25 +9,17 @@ Vue.component("Map", {
       token:
         "pk.eyJ1IjoiYmVuYm9iIiwiYSI6ImNsYTdwaHYxZzAzOXczbnBiajd4dGY0dmoifQ.WG0YjdTUn9uqchxX9YFgaQ",
       map: {},
+      prevHex: [],
+      colors: {
+        outline: "rgb(0, 0, 0)",
+        active: "rgba(123, 240, 134, 0.5)", //green
+        inactive: "rgba(255, 255, 255, 0.4)", // white
+      },
     };
   },
   watch: {
     hexagons: function (newVal, oldVal) {
-      if (oldVal) {
-        oldVal.forEach((hexId) => {
-          this.map.removeFeatureState(
-            { source: "hexes", id: hexId },
-            "selected"
-          );
-        });
-      }
-
-      newVal.forEach((hexId) => {
-        this.map.setFeatureState(
-          { source: "hexes", id: hexId },
-          { selected: true }
-        );
-      });
+      this.colorHex(newVal);
     },
   },
   mounted() {
@@ -37,7 +29,7 @@ Vue.component("Map", {
       container: "map",
       style: "mapbox://styles/benbob/clbs6pvt6000515pbjslxd3l3",
       center: [121.128, 23.633],
-      zoom: 7,
+      zoom: 6.8,
     });
 
     this.map.on("load", async () => {
@@ -63,11 +55,11 @@ Vue.component("Map", {
         paint: {
           "fill-color": [
             "case",
-            ["boolean", ["feature-state", "selected"], true],
-            "rgba(123, 240, 134, 0.5)", //green
-            "rgba(255, 255, 255, 0.2)", // white
+            ["==", ["feature-state", "selected"], 1],
+            this.colors.active, // satisfies condition
+            this.colors.inactive, // default
           ],
-          "fill-outline-color": "rgb(0, 0, 0)",
+          "fill-outline-color": this.colors.outline,
         },
       });
 
@@ -82,13 +74,18 @@ Vue.component("Map", {
       });
 
       this.map.on("click", "hexes-layer", async (e) => {
-        let hexProperties = e.features[0].properties;
+        let hexData = e.features[0].properties;
         new mapboxgl.Popup()
           .setLngLat(e.lngLat)
-          .setHTML("Clicked on hex ID: " + hexProperties.id)
+          .setHTML(
+            `<div class="popup-info">
+              <span><b>hexId:</b> ${hexData.id}</span>
+              <span><b>count:</b> ${hexData.count}</span>
+            </div>`
+          )
           .addTo(this.map);
 
-        this.clicked(hexProperties);
+        this.clicked(hexData);
       });
 
       this.map.on("mouseenter", "hexes-layer", () => {
@@ -102,16 +99,38 @@ Vue.component("Map", {
   },
   methods: {
     clicked(hexProperties) {
+      this.colorHex([hexProperties.id]);
       this.$emit("hexClick", hexProperties);
+    },
+    colorHex(current) {
+      if (this.prevHex) {
+        this.prevHex.forEach((hexId) => {
+          this.map.removeFeatureState(
+            { source: "hexes", id: hexId },
+            "selected"
+          );
+        });
+        this.prevHex = [];
+      }
+
+      current.forEach((hexId) => {
+        hexId = isNaN(hexId) ? Number("0x" + hexId) : hexId;
+        this.map.setFeatureState(
+          { source: "hexes", id: hexId },
+          { selected: 1 }
+        );
+        this.prevHex.push(hexId);
+      });
     },
     hexToFeature(hex) {
       const bounds = h3.cellToBoundary(hex.id);
       const coords = bounds.map((coord) => [coord[1], coord[0]]);
+      const intid = Number("0x" + hex.id);
       return {
         type: "Feature",
-        id: hex.id,
+        id: intid,
         properties: {
-          id: hex.id,
+          id: intid,
           count: hex.count,
         },
         geometry: {

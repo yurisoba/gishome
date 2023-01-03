@@ -59,15 +59,36 @@ func main() {
 
 	e.GET("/most/:hex", func(c echo.Context) error {
 		hex := c.Param("hex")
-		type item struct {
+		rows, _ := pool.Query(context.Background(),
+			`WITH sales_table AS (
+SELECT product_id, hex, COUNT(cart_id) AS sales_volumn
+	FROM "order"
+	GROUP BY (product_id, hex)
+	ORDER BY hex, sales_volumn DESC
+),
+sales_table_row_num AS (
+	SELECT *, ROW_NUMBER() OVER(PARTITION BY hex ORDER BY sales_volumn DESC) AS row_number
+	FROM sales_table
+),
+product_table AS (
+	SELECT distinct(id), name
+	FROM product
+)
+SELECT product_id, name
+FROM sales_table_row_num
+JOIN product_table
+ON product_id=id
+WHERE row_number < 10
+AND hex=$1
+ORDER BY sales_volumn`, hex)
+		type row struct {
 			Id   string `json:"id"`
 			Name string `json:"name"`
 		}
-		results := make([]item, 0)
-		for _, prod := range products {
-			if prod.Hex == hex {
-				results = append(results, item{prod.Id, prod.Name})
-			}
+		results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
 		}
 		return c.JSON(http.StatusOK, results)
 	})
@@ -85,7 +106,10 @@ func main() {
 
 	e.GET("/hexes", func(c echo.Context) error {
 		rows, _ := pool.Query(context.Background(),
-			"SELECT hex, count(1) FROM \"order\" GROUP BY hex")
+			`SELECT hex, count(1)
+FROM "order"
+JOIN product p on "order".product_id = p.id
+GROUP BY hex`)
 		type row struct {
 			Id    string `json:"id"`
 			Count int    `json:"count"`

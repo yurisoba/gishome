@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
-        "strings"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -30,58 +30,58 @@ func main() {
 		Format: "${time_rfc3339} ${latency_human} ${status} ${method} ${uri} err=\"${error}\"\n",
 	}))
 
-        type product struct {
-            Id   string
-            Name string
-            Hex  string
-        }
-        products := []product{
-            {"10001", "apple - WHITE", "854bb1bbfffffff"},
-            {"10002", "apple - PINK", "854b86c3fffffff"},
-            {"10003", "apple - EXPENSIVE", "854b86c3fffffff"},
-            {"10004", "apple - LIMITED EDITION", "854ba2d3fffffff"},
-        }
+	type product struct {
+		Id   string
+		Name string
+		Hex  string
+	}
+	products := []product{
+		{"10001", "apple - WHITE", "854bb1bbfffffff"},
+		{"10002", "apple - PINK", "854b86c3fffffff"},
+		{"10003", "apple - EXPENSIVE", "854b86c3fffffff"},
+		{"10004", "apple - LIMITED EDITION", "854ba2d3fffffff"},
+	}
 
-        e.GET("/product/:name", func(c echo.Context) error {
-            name := c.Param("name")
-            type item struct {
-                Id   string `json:"id"`
-                Name string `json:"name"`
-            }
-            results := make([]item, 0)
-            for _, prod := range products {
-                if strings.HasPrefix(prod.Name, name) {
-                    results = append(results, item{prod.Id, prod.Name})
-                }
-            }
-            return c.JSON(http.StatusOK, results)
-        })
+	e.GET("/product/:name", func(c echo.Context) error {
+		name := c.Param("name")
+		type item struct {
+			Id   string `json:"id"`
+			Name string `json:"name"`
+		}
+		results := make([]item, 0)
+		for _, prod := range products {
+			if strings.HasPrefix(prod.Name, name) {
+				results = append(results, item{prod.Id, prod.Name})
+			}
+		}
+		return c.JSON(http.StatusOK, results)
+	})
 
-        e.GET("/most/:hex", func (c echo.Context) error {
-            hex := c.Param("hex")
-            type item struct {
-                Id   string `json:"id"`
-                Name string `json:"name"`
-            }
-            results := make([]item, 0)
-            for _, prod := range products {
-                if prod.Hex == hex {
-                    results = append(results, item{prod.Id, prod.Name})
-                }
-            }
-            return c.JSON(http.StatusOK, results)
-        })
+	e.GET("/most/:hex", func(c echo.Context) error {
+		hex := c.Param("hex")
+		type item struct {
+			Id   string `json:"id"`
+			Name string `json:"name"`
+		}
+		results := make([]item, 0)
+		for _, prod := range products {
+			if prod.Hex == hex {
+				results = append(results, item{prod.Id, prod.Name})
+			}
+		}
+		return c.JSON(http.StatusOK, results)
+	})
 
-        e.GET("/hex/:prod_id", func(c echo.Context) error {
-            prod_id := c.Param("prod_id")
-            results := make([]string, 0)
-            for _, prod := range products {
-                if prod.Id == prod_id {
-                    results = append(results, prod.Hex)
-                }
-            }
-            return c.JSON(http.StatusOK, results)
-        })
+	e.GET("/hex/:prod_id", func(c echo.Context) error {
+		prod_id := c.Param("prod_id")
+		results := make([]string, 0)
+		for _, prod := range products {
+			if prod.Id == prod_id {
+				results = append(results, prod.Hex)
+			}
+		}
+		return c.JSON(http.StatusOK, results)
+	})
 
 	e.GET("/hexes", func(c echo.Context) error {
 		rows, _ := pool.Query(context.Background(),

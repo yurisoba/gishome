@@ -64,6 +64,7 @@ header {
   flex: 1;
   padding: 10px;
   height: 91vh;
+  min-width: 300px;
 }
 
 .input-form {
@@ -173,4 +174,22 @@ header {
 
 .center {
   text-align: center;
+}
+
+@media only screen and (max-width: 600px) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .map-container {
+    height: 50vh;
+  }
+
+  #map {
+    height: 100%;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
 }

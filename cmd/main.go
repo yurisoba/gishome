@@ -153,6 +153,144 @@ ORDER BY sales_volumn`, hex)
 		return c.JSON(http.StatusOK, results)
 	})
 
+
+	e.GET("/heatmap/:hex", func(c echo.Context) error {
+            return c.JSON(http.StatusOK, map[string]interface{}{
+                "array": []map[string]interface{}{
+                    {
+                        "name": "854bb1affffffff",
+                        "count": 122,
+                    },
+                    {
+                        "name": "854bb183fffffff",
+                        "count": 17213,
+                    },
+                    {
+                        "name": "854ba293fffffff",
+                        "count": 44,
+                    },
+                    {
+                        "name": "854ba283fffffff",
+                        "count": 9001,
+                    },
+                    {
+                        "name": "854ba1dbfffffff",
+                        "count": 12301,
+                    },
+                    {
+                        "name": "854ba14bfffffff",
+                        "count": 5993,
+                    },
+                    {
+                        "name": "854ba0bbfffffff",
+                        "count": 1404,
+                    },
+                },
+            })
+
+	})
+
+        e.GET("/suppliers/:customer", func(c echo.Context) error {
+            return c.JSON(http.StatusOK, map[string]interface{}{
+                "array": []map[string]interface{}{
+                    {
+                        "name": "Supplier 1",
+                        "count": 122,
+                    },
+                    {
+                        "name": "Supplier 2",
+                        "count": 233,
+                    },
+                    {
+                        "name": "Supplier 3",
+                        "count": 44,
+                    },
+                },
+            })
+        })
+
+        e.GET("/categories/:customer", func(c echo.Context) error {
+            return c.JSON(http.StatusOK, map[string]interface{}{
+                "array": []map[string]interface{}{
+                    {
+                        "name": "Cat 1",
+                        "count": 122,
+                    },
+                    {
+                        "name": "Cat 2",
+                        "count": 233,
+                    },
+                    {
+                        "name": "Cat 3",
+                        "count": 44,
+                    },
+                },
+            })
+        })
+
+        e.GET("/time/customer/:customer", func(c echo.Context) error {
+            return c.JSON(http.StatusOK, map[string]interface{}{
+                "array": []map[string]interface{}{
+                    {
+                        "time": "2011-02-01 00:00:00",
+                        "count": 122,
+                    },
+                    {
+                        "name": "2011-03-01 00:00:00",
+                        "count": 233,
+                    },
+                    {
+                        "name": "2011-04-01 00:00:00",
+                        "count": 44,
+                    },
+                    {
+                        "name": "2011-05-01 00:00:00",
+                        "count": 445,
+                    },
+                    {
+                        "name": "2011-06-01 00:00:00",
+                        "count": 15,
+                    },
+                    {
+                        "name": "2012-01-01 00:00:00",
+                        "count": 45,
+                    },
+                },
+            })
+        })
+
+        e.GET("/time/product/:product", func(c echo.Context) error {
+            return c.JSON(http.StatusOK, map[string]interface{}{
+                "array": []map[string]interface{}{
+                    {
+                        "time": "2011-02-01 00:00:00",
+                        "count": 122,
+                    },
+                    {
+                        "name": "2011-03-01 00:00:00",
+                        "count": 233,
+                    },
+                    {
+                        "name": "2011-04-01 00:00:00",
+                        "count": 44,
+                    },
+                    {
+                        "name": "2011-05-01 00:00:00",
+                        "count": 445,
+                    },
+                    {
+                        "name": "2011-06-01 00:00:00",
+                        "count": 15,
+                    },
+                    {
+                        "name": "2012-01-01 00:00:00",
+                        "count": 45,
+                    },
+                },
+            })
+        })
+
+
 	e.GET("/hex/:prod_id", func(c echo.Context) error {
 		prod_id := c.Param("prod_id")
 		results := make([]string, 0)

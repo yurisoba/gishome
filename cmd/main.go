@@ -57,6 +57,66 @@ func main() {
 		return c.JSON(http.StatusOK, results)
 	})
 
+        e.GET("/stats/:hex", func(c echo.Context) error {
+                hex := c.Param("hex")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT *
+FROM (
+        SELECT name, SUBSTRING(t::TEXT,0, 11), row_number() OVER (PARTITION BY (t) ORDER BY c DESC) AS row_numb, c
+	FROM (
+		SELECT p.name, date_trunc('month', order_creation_time) AS t, count(1) AS c
+		FROM "order" o
+		JOIN product p
+			ON (p.id = o.product_id)
+		JOIN suppliers s
+			ON (p.supplier_id = s.id)
+                WHERE hex = $1
+                AND p.id IS NOT NULL
+                AND s.id IS NOT NULL
+		GROUP BY (p.name, t)
+	) f1
+) f2
+WHERE row_numb <= 3`, hex)
+                type row struct {
+                    Name string `json:"name"`
+                    T    string `json:"month"`
+                    R    int    `json:"ranking"`
+                    C    int    `json:"count"`
+                }
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
+        })
+
+        e.GET("/loyal/:hex", func(c echo.Context) error {
+                hex := c.Param("hex")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT customer_id, count(1) AS c
+FROM "order" o
+JOIN product p
+    ON (p.id = o.product_id)
+JOIN suppliers s
+    ON (p.supplier_id = s.id)
+WHERE hex = $1
+AND p.id IS NOT NULL
+AND s.id IS NOT NULL
+GROUP BY (customer_id)
+ORDER BY c DESC LIMIT 3`, hex)
+                type row struct {
+                    CID  string `json:"customer_id"`
+                    C    int    `json:"sales_volumn"`
+                }
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
+        })
+
 	e.GET("/most/:hex", func(c echo.Context) error {
 		hex := c.Param("hex")
 		rows, _ := pool.Query(context.Background(),

@@ -1,10 +1,13 @@
 import "./map.js";
+import "./modal.js";
+import "./graph.js";
 import "./form.js";
 
 Vue.component("Info", {
   name: "info",
   data() {
     return {
+      picked_view: "map_view",
       product: [],
       hexagons: [],
       actionType: "init",
@@ -44,24 +47,50 @@ Vue.component("Info", {
     },
   },
   template: `
-  <div class="main-container">
-    <Map @hexClick="onHexClick" v-bind:hexagons="hexagons"/>
-    <div class="info-container col">
-      <div class="information">
-        <Form v-bind:form_values="product" @submit="onFormSubmit"/>
-        <Results v-bind:results_prop="product" v-bind:actionType="actionType" v-bind:hexagons="hexagons"/>
+  <div>
+    <header>
+      <h1>Círculo de Hadas App</h1>
+      <div class="views">
+        <input type="radio" id="map_view" value="map_view" v-model="picked_view" />
+        <label for="map_view" :class="picked_view=='map_view'?'active':''">Map View</label>
+        <input type="radio" id="graph_view" value="graph_view" v-model="picked_view" />
+        <label for="graph_view" :class="picked_view=='graph_view'?'active':''">Graph View</label>
+      </div>
+    </header>
+    <div v-if="picked_view=='map_view'" class="main-map-view-container">
+      <Map @hexClick="onHexClick" v-bind:hexagons="hexagons"/>
+      <div class="info-container col">
+        <div class="information">
+          <Form v-bind:form_values="product" @submit="onFormSubmit"/>
+          <Results v-bind:results_prop="product" v-bind:actionType="actionType" v-bind:hexagons="hexagons"/>
+        </div>
       </div>
     </div>
-</div>
+    <div v-else class="main-graph-view-container">
+     <Graph/>
+    </div>
+  </div>
  `,
 });
 
 Vue.component("Results", {
   props: ["results_prop", "hexagons", "actionType"],
+  data() {
+    return {
+      show: false,
+      info: {},
+    };
+  },
+  methods: {
+    openModal(productValues) {
+      this.info = productValues;
+      this.show = true;
+    },
+  },
   template: `<div class="results">
     <ul class="result-list" v-if="results_prop.length > 0">
-      <li class="item" v-for="(values, i) in results_prop"  v-bind:key="i">
-        <div class="key"><span class="number">{{i}}</span></div>
+      <li class="item" v-for="(values, i) in results_prop"  v-bind:key="i" @click="openModal(values)">
+        <div class="key"><span class="number">{{++i}}</span></div>
         <div class="info">
           <span class="data" v-for="(val, key, j) in values" v-bind:key="j">
             <b>{{ key }}:</b> {{ val }}
@@ -75,6 +104,7 @@ Vue.component("Results", {
     <div class="center" v-else-if="actionType=='id' && hexagons.length == 0">
       <span>404 Id not found 😭</span>
     </div>
+    <ProductModal v-if="show" :info="info" @close="show = false"/>
   </div>`,
 });
 

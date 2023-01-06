@@ -2,11 +2,19 @@ Vue.component("ProductModal", {
   template: `
     <Modal @close="$emit('close')">
         <h3 slot="header">{{name}}</h3>
+        <div slot="body">
+          <div v-if="time">
+            {{time}}
+          </div>
+          <div v-else>
+            <span>No available data 😭</span>
+          </div>
+        </div>
     </Modal>`,
   props: ["info"],
   data() {
     return {
-      text: "text here",
+      time: {},
     };
   },
   computed: {
@@ -15,7 +23,14 @@ Vue.component("ProductModal", {
     },
   },
   mounted() {
-    console.log("fetch information");
+    if (this.info.id) {
+      this.fetchInfo();
+    }
+  },
+  methods: {
+    async fetchInfo() {
+      this.time = await (await fetch(`/time/product/${this.info.id}`)).json();
+    },
   },
 });
 

@@ -159,6 +159,39 @@ ORDER BY sales_volumn`, hex)
 		return c.JSON(http.StatusOK, results)
 	})
 
+	e.GET("/mostsupply/:hex", func(c echo.Context) error {
+		hex := c.Param("hex")
+		rows, _ := pool.Query(context.Background(),
+			`WITH sales_table AS (
+  	SELECT suppliers.name, hex, COUNT(cart_id) AS supplier_volume
+	FROM "order"
+	LEFT JOIN product
+	ON product_id = product.id
+	JOIN suppliers
+	ON product.supplier_id = suppliers.id
+	WHERE supplier_id IS NOT NULL
+	GROUP BY (suppliers.name, hex)
+	ORDER BY hex, supplier_volume DESC
+),
+sales_table_row_num AS (
+  SELECT *, ROW_NUMBER() OVER(PARTITION BY hex ORDER BY supplier_volume DESC) AS row_number
+  FROM sales_table
+)
+SELECT name, supplier_volume
+FROM sales_table_row_num
+WHERE row_number=1
+AND hex=$1`, hex)
+		type row struct {
+			Name   string `json:"name"`
+                        Count  string `json:"count"`
+		}
+		results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
+	})
 
 	e.GET("/heatmap/:product", func(c echo.Context) error {
                 pid := c.Param("product")

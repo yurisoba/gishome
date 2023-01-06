@@ -191,41 +191,55 @@ ORDER BY sales_volumn`, hex)
 	})
 
         e.GET("/suppliers/:customer", func(c echo.Context) error {
-            return c.JSON(http.StatusOK, map[string]interface{}{
-                "array": []map[string]interface{}{
-                    {
-                        "name": "Supplier 1",
-                        "count": 122,
-                    },
-                    {
-                        "name": "Supplier 2",
-                        "count": 233,
-                    },
-                    {
-                        "name": "Supplier 3",
-                        "count": 44,
-                    },
-                },
-            })
+                cid := c.Param("customer")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT s."name", count(1)
+FROM "order" o
+JOIN product p
+	ON (o.product_id=p.id)
+JOIN suppliers s
+	ON (s.id=p.supplier_id)
+WHERE customer_id = $1
+AND p.id IS NOT NULL
+AND s.id IS NOT NULL
+GROUP BY s."name"
+ORDER BY count DESC`, cid)
+                type row struct {
+                    S string `json:"supplier"`
+                    C int    `json:"sales_volumn"`
+                }
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
         })
 
         e.GET("/categories/:customer", func(c echo.Context) error {
-            return c.JSON(http.StatusOK, map[string]interface{}{
-                "array": []map[string]interface{}{
-                    {
-                        "name": "Cat 1",
-                        "count": 122,
-                    },
-                    {
-                        "name": "Cat 2",
-                        "count": 233,
-                    },
-                    {
-                        "name": "Cat 3",
-                        "count": 44,
-                    },
-                },
-            })
+                cid := c.Param("customer")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT p.cat, count(1)
+FROM "order" o
+JOIN product p
+	ON (o.product_id=p.id)
+JOIN suppliers s
+	ON (s.id=p.supplier_id)
+WHERE customer_id = $1
+AND p.id IS NOT NULL
+AND s.id IS NOT NULL
+GROUP BY p.cat
+ORDER BY count DESC`, cid)
+                type row struct {
+                    S string `json:"supplier"`
+                    C int    `json:"sales_volumn"`
+                }
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
         })
 
         e.GET("/time/customer/:customer", func(c echo.Context) error {

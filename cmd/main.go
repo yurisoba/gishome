@@ -44,12 +44,16 @@ func main() {
 	e.GET("/product/:name", func(c echo.Context) error {
                 name := c.Param("name")
                 rows, _ := pool.Query(context.Background(),
-                        `SELECT id, name
+                        `SELECT p.id, p.name, s.name
 FROM product p
-WHERE name ~ $1`, name)
+JOIN suppliers s
+    ON (p.supplier_id = s.id)
+WHERE s.id IS NOT NULL
+AND p.name ~ $1`, name)
 		type row struct {
-			Id   string `json:"id"`
-			Name string `json:"name"`
+			Id       string `json:"id"`
+			Name     string `json:"name"`
+                        Supplier string `json:"supplier"`
 		}
                 results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
 		if err != nil {

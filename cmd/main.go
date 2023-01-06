@@ -154,40 +154,23 @@ ORDER BY sales_volumn`, hex)
 	})
 
 
-	e.GET("/heatmap/:hex", func(c echo.Context) error {
-            return c.JSON(http.StatusOK, map[string]interface{}{
-                "array": []map[string]interface{}{
-                    {
-                        "name": "854bb1affffffff",
-                        "count": 122,
-                    },
-                    {
-                        "name": "854bb183fffffff",
-                        "count": 17213,
-                    },
-                    {
-                        "name": "854ba293fffffff",
-                        "count": 44,
-                    },
-                    {
-                        "name": "854ba283fffffff",
-                        "count": 9001,
-                    },
-                    {
-                        "name": "854ba1dbfffffff",
-                        "count": 12301,
-                    },
-                    {
-                        "name": "854ba14bfffffff",
-                        "count": 5993,
-                    },
-                    {
-                        "name": "854ba0bbfffffff",
-                        "count": 1404,
-                    },
-                },
-            })
-
+	e.GET("/heatmap/:product", func(c echo.Context) error {
+                pid := c.Param("product")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT hex, count(1) AS c
+FROM "order" o
+WHERE product_id = $1
+GROUP BY hex;`, pid)
+                type row struct {
+                    H string `json:"hex"`
+                    C int    `json:"count"`
+                }
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
 	})
 
         e.GET("/suppliers/:customer", func(c echo.Context) error {

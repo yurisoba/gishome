@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -43,16 +42,19 @@ func main() {
 	}
 
 	e.GET("/product/:name", func(c echo.Context) error {
-		name := c.Param("name")
-		type item struct {
+                name := c.Param("name")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT id, name
+FROM product p
+WHERE name ~ $1`, name)
+		type row struct {
 			Id   string `json:"id"`
 			Name string `json:"name"`
 		}
-		results := make([]item, 0)
-		for _, prod := range products {
-			if strings.HasPrefix(prod.Name, name) {
-				results = append(results, item{prod.Id, prod.Name})
-			}
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
 		}
 		return c.JSON(http.StatusOK, results)
 	})
@@ -189,7 +191,7 @@ GROUP BY s."name"
 ORDER BY count DESC`, cid)
                 type row struct {
                     S string `json:"supplier"`
-                    C int    `json:"sales_volumn"`
+                    C int    `json:"count"`
                 }
                 results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
 		if err != nil {
@@ -215,7 +217,7 @@ GROUP BY p.cat
 ORDER BY count DESC`, cid)
                 type row struct {
                     S string `json:"supplier"`
-                    C int    `json:"sales_volumn"`
+                    C int    `json:"count"`
                 }
                 results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
 		if err != nil {
@@ -242,7 +244,7 @@ order by t;
 `, cid)
                 type row struct {
                     MTH  string `json:"month"`
-                    C    int    `json:"sales_volumn"`
+                    C    int    `json:"count"`
                 }
                 results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
 		if err != nil {
@@ -268,7 +270,7 @@ order by t;
 `, pid)
                 type row struct {
                     MTH  string `json:"month"`
-                    C    int    `json:"sales_volumn"`
+                    C    int    `json:"count"`
                 }
                 results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
 		if err != nil {

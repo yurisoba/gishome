@@ -243,65 +243,56 @@ ORDER BY count DESC`, cid)
         })
 
         e.GET("/time/customer/:customer", func(c echo.Context) error {
-            return c.JSON(http.StatusOK, map[string]interface{}{
-                "array": []map[string]interface{}{
-                    {
-                        "time": "2011-02-01 00:00:00",
-                        "count": 122,
-                    },
-                    {
-                        "name": "2011-03-01 00:00:00",
-                        "count": 233,
-                    },
-                    {
-                        "name": "2011-04-01 00:00:00",
-                        "count": 44,
-                    },
-                    {
-                        "name": "2011-05-01 00:00:00",
-                        "count": 445,
-                    },
-                    {
-                        "name": "2011-06-01 00:00:00",
-                        "count": 15,
-                    },
-                    {
-                        "name": "2012-01-01 00:00:00",
-                        "count": 45,
-                    },
-                },
-            })
+                cid := c.Param("customer")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT SUBSTRING(date_trunc('month', order_creation_time)::text, 0, 11) AS t, count(1) AS c
+FROM "order" o
+JOIN product p
+	ON (p.id = o.product_id)
+JOIN suppliers s
+	ON (p.supplier_id = s.id)
+        AND p.id IS NOT NULL
+        AND s.id IS NOT null
+        AND customer_id = $1
+GROUP BY (t)
+order by t;
+`, cid)
+                type row struct {
+                    MTH  string `json:"month"`
+                    C    int    `json:"sales_volumn"`
+                }
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
         })
 
         e.GET("/time/product/:product", func(c echo.Context) error {
-            return c.JSON(http.StatusOK, map[string]interface{}{
-                "array": []map[string]interface{}{
-                    {
-                        "time": "2011-02-01 00:00:00",
-                        "count": 122,
-                    },
-                    {
-                        "name": "2011-03-01 00:00:00",
-                        "count": 233,
-                    },
-                    {
-                        "name": "2011-04-01 00:00:00",
-                        "count": 44,
-                    },
-                    {
-                        "name": "2011-05-01 00:00:00",
-                        "count": 445,
-                    },
-                    {
-                        "name": "2011-06-01 00:00:00",
-                        "count": 15,
-                    },
-                    {
-                        "name": "2012-01-01 00:00:00",
-                        "count": 45,
-                    },
-                },
-            })
+                pid := c.Param("product")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT SUBSTRING(date_trunc('month', order_creation_time)::text, 0, 11) AS t, count(1) AS c
+FROM "order" o
+JOIN product p
+	ON (p.id = o.product_id)
+JOIN suppliers s
+	ON (p.supplier_id = s.id)
+        AND p.id = $1
+        AND s.id IS NOT null
+GROUP BY (t)
+order by t;
+`, pid)
+                type row struct {
+                    MTH  string `json:"month"`
+                    C    int    `json:"sales_volumn"`
+                }
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
         })
 
 

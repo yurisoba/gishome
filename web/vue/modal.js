@@ -47,6 +47,14 @@ Vue.component("ClientModal", {
     <Modal @close="$emit('close')">
         <h3 slot="header">{{name}}</h3>
         <div slot="body">
+          <div class="chart-wrapper">
+              <h4>Top 3 Products</h4>
+              <ul class="info detail-list-container">
+                <li class="data" v-for="(val, key, i) in top3" :key="i">
+                  {{ val }}
+                </li>
+              </ul>
+          </div>
           <Chart 
             v-if="time" 
             title="Time" 
@@ -79,6 +87,7 @@ Vue.component("ClientModal", {
       categories: [],
       suppliers: [],
       time: [],
+      top3: [],
     };
   },
   computed: {
@@ -99,10 +108,14 @@ Vue.component("ClientModal", {
       const categories = await (await fetch(`/categories/${this.cId}`)).json();
       const suppliers = await (await fetch(`/suppliers/${this.cId}`)).json();
       const time = await (await fetch(`/time/customer/${this.cId}`)).json();
+      const top3 = await (await fetch(`/top3/${this.cId}`)).json();
 
       this.categories = categories || [];
       this.suppliers = suppliers || [];
       this.time = time || [];
+      top3.forEach((obj) => {
+        this.top3.push(obj.name);
+      });
     },
   },
 });

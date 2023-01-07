@@ -120,9 +120,9 @@ LIMIT 3`, cid)
                 rows, _ := pool.Query(context.Background(),
                         `SELECT *
 FROM (
-        SELECT name, SUBSTRING(t::TEXT,0, 11), row_number() OVER (PARTITION BY (t) ORDER BY c DESC) AS row_numb, c
+        SELECT p2.id, p2.name, SUBSTRING(t::TEXT,0, 11), row_number() OVER (PARTITION BY (t) ORDER BY c DESC) AS row_numb, c
 	FROM (
-		SELECT p.name, date_trunc('month', order_creation_time) AS t, count(1) AS c
+		SELECT p.id, date_trunc('month', order_creation_time) AS t, count(1) AS c
 		FROM "order" o
 		JOIN product p
 			ON (p.id = o.product_id)
@@ -131,11 +131,14 @@ FROM (
                 WHERE hex = $1
                 AND p.id IS NOT NULL
                 AND s.id IS NOT NULL
-		GROUP BY (p.name, t)
+		GROUP BY (p.id, t)
 	) f1
+        JOIN product p2
+            ON (f1.id = p2.id)
 ) f2
 WHERE row_numb <= 3`, hex)
                 type row struct {
+                    Id   string `json:"id"`
                     Name string `json:"name"`
                     T    string `json:"month"`
                     R    int    `json:"ranking"`

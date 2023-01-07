@@ -22,12 +22,6 @@ Vue.component("HexInfo", {
   <div>
     <div class="results" v-if="!hex.loading">
       <CollapsableList
-        itemType="Product" 
-        title="Products" 
-        :results="hex.products"
-        @heatmap="onHeatMap"
-        @modal="openModal" />
-      <CollapsableList
         itemType="Client" 
         title="Clients" 
         :results="hex.clients" 
@@ -36,6 +30,18 @@ Vue.component("HexInfo", {
         itemType="Supplier" 
         title="Suppliers" 
         :results="hex.suppliers"/>
+      <CollapsableList
+        itemType="Product" 
+        title="Top Products" 
+        :results="hex.stats"
+        @heatmap="onHeatMap"
+        @modal="openModal" />
+      <CollapsableList
+        itemType="Product" 
+        title="All Products" 
+        :results="hex.products"
+        @heatmap="onHeatMap"
+        @modal="openModal" />
       <ProductModal v-if="show.Product" :info="show.info" @close="show.Product = false"/>
       <ClientModal v-if="show.Client" :info="show.info" @close="show.Client = false"/>
     </div>

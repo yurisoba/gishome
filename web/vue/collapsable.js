@@ -42,8 +42,14 @@ Vue.component("Product", {
       return this.info.name;
     },
   },
+  methods: {
+    onToogle() {
+      this.$emit("toogle", this.num);
+      this.$emit("heatmap", this.info);
+    },
+  },
   template: `
-  <Collapsable :collapsed="collapsed" @toogle="$emit('toogle', num)">
+  <Collapsable :collapsed="collapsed" @toogle="onToogle">
       <div class="item" slot="header">
         <div class="key">
           <span class="number">{{num}}</span>
@@ -54,7 +60,6 @@ Vue.component("Product", {
       </div>
       <div class="body-wrapper" slot="body">
         <span class="modal-trigger" @click="$emit('openDetail', info)">Open details</span>
-        <span class="modal-trigger" @click="$emit('heatmap', info)">Open heatmap</span>
         <div class="info">
           <span class="data" v-for="(val, key, j) in this.info" :key="j">
             <b>{{ key }}:</b> {{ val }}
@@ -84,6 +89,33 @@ Vue.component("Client", {
       <div class="body-wrapper" slot="body">
         <span class="modal-trigger" @click="$emit('openDetail', info)">Open details</span>
         <DetailList :info="this.info"/>
+      </div>
+  </Collapsable>`,
+});
+
+Vue.component("Supplier", {
+  props: ["collapsed", "info", "num"],
+  computed: {
+    title() {
+      return this.info.name;
+    },
+  },
+  template: `
+  <Collapsable :collapsed="collapsed" @toogle="$emit('toogle', num)">
+      <div class="item" slot="header">
+        <div class="key">
+          <span class="number">{{num}}</span>
+        </div>
+        <div class="title">
+          <h4>{{title}}</h4>
+        </div>
+      </div>
+      <div class="body-wrapper" slot="body">
+        <div class="info">
+          <span class="data" v-for="(val, key, j) in this.info" :key="j">
+            <b>{{ key }}:</b> {{ val }}
+          </span>
+        </div>
       </div>
   </Collapsable>`,
 });

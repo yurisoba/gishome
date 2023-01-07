@@ -399,7 +399,7 @@ h1 {
   display: flex;
   flex-direction: column;
   flex: 1;
-  max-height: 50%;
+  max-height: 33%;
   padding: 5px;
   border: solid 1px rgba(85, 85, 85, 0.8);
   border-radius: 5px;
@@ -416,7 +416,7 @@ h1 {
   .collapse-list-container
   .collapse-list-results
   .result-list.collapse-list {
-  max-height: 90%;
+  max-height: 85%;
 }
 
 /* custom scrollbar */

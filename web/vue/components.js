@@ -10,6 +10,7 @@ Vue.component("Info", {
   name: "info",
   data() {
     return {
+      actionType: "init",
       picked_view: "map_view",
       results: {
         products: [],
@@ -18,12 +19,14 @@ Vue.component("Info", {
       },
       hexResults: {
         loading: false,
+        suppliers: [],
         products: [],
         clients: [],
         stats: [],
       },
+      // these two values will be sent to the map automatically when updated
       hexagons: [],
-      actionType: "init",
+      mapProps: {},
     };
   },
   methods: {
@@ -45,11 +48,14 @@ Vue.component("Info", {
     hexIdToString(hexId) {
       return hexId ? "85" + hexId.toString(16) : "";
     },
+    hexIdToInt(hexId) {
+      return Number("0x" + hexId.substr(2));
+    },
     onHexClick(hexData) {
       this.hexagons = [hexData.id];
       this.$refs.form.hexPicked();
       this.hexResults.loading = true;
-      this.getMostProduct(hexData.id);
+      this.getHexData(hexData.id);
     },
     openModal(itemType, values) {
       this.results.info = values;
@@ -60,22 +66,26 @@ Vue.component("Info", {
     },
     async getHeatMap(values) {
       let p_id = values.id;
-      const hexagons = await (await fetch(`/heatmap/${p_id}`)).json();
-      console.log("heatmap", hexagons);
-      // if (hexagons) {
-      //   this.hexagons = hexagons;
-      // }
+      const data = await (await fetch(`/heatmap/${p_id}`)).json();
+      console.log("from components.js, getHeatMap", data);
+      let h = data.array.map((x) => this.hexIdToInt(x["name"]));
+
+      // these two values will be sent to the map automatically when updated
+      this.hexagons = h;
+      this.mapProps = data;
     },
-    async getMostProduct(hexId) {
+    async getHexData(hexId) {
       this.hexagons = [hexId];
 
       let h = this.hexIdToString(hexId);
       const products = await (await fetch(`/most/${h}`)).json();
+      const suppliers = await (await fetch(`/mostsupply/${h}`)).json();
       const stats = await (await fetch(`/stats/${h}`)).json();
       const clients = await (await fetch(`/loyal/${h}`)).json();
 
       this.hexResults = {
         loading: false,
+        suppliers,
         products,
         stats,
         clients,
@@ -103,7 +113,10 @@ Vue.component("Info", {
       </div>
     </header>
     <div v-if="picked_view=='map_view'" class="main-map-view-container">
-      <Map @hexClick="onHexClick" :hexagons="hexagons"/>
+      <Map 
+        @hexClick="onHexClick" 
+        :hexagons="hexagons"
+        :info="mapProps"/>
       <div class="info-container col">
         <div class="information">
           <Form 

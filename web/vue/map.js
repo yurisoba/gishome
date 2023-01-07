@@ -3,7 +3,7 @@ Vue.component("Map", {
     <div class="map-container col">
       <div id="map"></div>
     </div>`,
-  props: ["hexagons"],
+  props: ["hexagons", "info"],
   data() {
     return {
       token:
@@ -18,8 +18,17 @@ Vue.component("Map", {
     };
   },
   watch: {
-    hexagons: function (newVal, oldVal) {
+    hexagons(newVal, oldVal) {
+      // here is where I colour the hexagons
+      console.log(
+        "FROM map.js, triggered every time hexagons is updated",
+        newVal
+      );
       this.colorHex(newVal);
+    },
+    info(newVal, oldVal) {
+      // here is where I colour the hexagons
+      console.log("FROM map.js, triggered every time info is updated", newVal);
     },
   },
   mounted() {
@@ -98,7 +107,6 @@ Vue.component("Map", {
   },
   methods: {
     clicked(hexProperties) {
-      this.colorHex([hexProperties.id]);
       this.$emit("hexClick", hexProperties);
     },
     colorHex(current) {

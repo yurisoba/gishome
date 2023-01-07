@@ -14,7 +14,7 @@ Vue.component("HexInfo", {
       this.show.info = values;
       this.show[itemType] = true;
     },
-    showHeatMap(values) {
+    onHeatMap(values) {
       this.$emit("heatmap", values);
     },
   },
@@ -25,13 +25,17 @@ Vue.component("HexInfo", {
         itemType="Product" 
         title="Products" 
         :results="hex.products"
-        @heatmap="showHeatMap"
+        @heatmap="onHeatMap"
         @modal="openModal" />
       <CollapsableList
         itemType="Client" 
         title="Clients" 
         :results="hex.clients" 
         @modal="openModal"/>
+      <CollapsableList
+        itemType="Supplier" 
+        title="Suppliers" 
+        :results="hex.suppliers"/>
       <ProductModal v-if="show.Product" :info="show.info" @close="show.Product = false"/>
       <ClientModal v-if="show.Client" :info="show.info" @close="show.Client = false"/>
     </div>

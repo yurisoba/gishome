@@ -63,6 +63,58 @@ AND p.name ~ $1`, name)
 		return c.JSON(http.StatusOK, results)
 	})
 
+	e.GET("/top3/:customer", func(c echo.Context) error {
+                cid := c.Param("customer")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT p.name, c
+FROM (
+    SELECT product_id, count(1) as c
+    FROM "order" o
+    WHERE customer_id = $1
+    GROUP BY (product_id) ORDER BY product_id DESC
+) f1
+JOIN product p
+    ON (p.id = f1.product_id)
+WHERE p.id IS NOT NULL
+LIMIT 3`, cid)
+                type row struct {
+                    N string `json:"name"`
+                    C int    `json:"count"`
+                }
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
+	})
+
+	e.GET("/top3/:customer", func(c echo.Context) error {
+                cid := c.Param("customer")
+                rows, _ := pool.Query(context.Background(),
+                        `SELECT p.name, c
+FROM (
+    SELECT product_id, count(1) as c
+    FROM "order" o
+    WHERE customer_id = $1
+    GROUP BY (product_id) ORDER BY product_id DESC
+) f1
+JOIN product p
+    ON (p.id = f1.product_id)
+WHERE p.id IS NOT NULL
+LIMIT 3`, cid)
+                type row struct {
+                    N string `json:"name"`
+                    C int    `json:"count"`
+                }
+                results, err := pgx.CollectRows(rows, pgx.RowToStructByPos[row])
+		if err != nil {
+			_ = c.String(http.StatusBadGateway, err.Error())
+			return errors.New("ERR 0001 - BAD DB")
+		}
+		return c.JSON(http.StatusOK, results)
+	})
+
         e.GET("/stats/:hex", func(c echo.Context) error {
                 hex := c.Param("hex")
                 rows, _ := pool.Query(context.Background(),

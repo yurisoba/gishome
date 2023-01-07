@@ -4,6 +4,7 @@ import "./hexinfo.js";
 import "./graph.js";
 import "./form.js";
 import "./collapsable.js";
+import "./charts.js";
 
 Vue.component("Info", {
   name: "info",
@@ -45,13 +46,25 @@ Vue.component("Info", {
       return hexId ? "85" + hexId.toString(16) : "";
     },
     onHexClick(hexData) {
-      this.getMostProduct(hexData.id);
+      this.hexagons = [hexData.id];
       this.$refs.form.hexPicked();
       this.hexResults.loading = true;
+      this.getMostProduct(hexData.id);
     },
     openModal(itemType, values) {
       this.results.info = values;
       this.results.modalShow = true;
+    },
+    showHeatMap(values) {
+      this.getHeatMap(values.id);
+    },
+    async getHeatMap(values) {
+      let p_id = values.id;
+      const hexagons = await (await fetch(`/heatmap/${p_id}`)).json();
+      console.log("heatmap", hexagons);
+      // if (hexagons) {
+      //   this.hexagons = hexagons;
+      // }
     },
     async getMostProduct(hexId) {
       this.hexagons = [hexId];
@@ -107,6 +120,7 @@ Vue.component("Info", {
                 itemType="Product" 
                 title="Products" 
                 :results="results.products"
+                @heatmap="getHeatMap"
                 @modal="openModal" />
               <ProductModal v-if="results.modalShow" :info="results.info" @close="results.modalShow = false"/>
             </div>
@@ -114,7 +128,8 @@ Vue.component("Info", {
           <HexInfo 
             v-else-if="actionType =='hex'"
             class="results-container"
-            :hex="this.hexResults"/>
+            :hex="this.hexResults"
+            @heatmap="getHeatMap"/>
         </div>
       </div>
     </div>

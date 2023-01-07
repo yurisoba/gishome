@@ -14,6 +14,9 @@ Vue.component("HexInfo", {
       this.show.info = values;
       this.show[itemType] = true;
     },
+    showHeatMap(values) {
+      this.$emit("heatmap", values);
+    },
   },
   template: `
   <div>
@@ -22,6 +25,7 @@ Vue.component("HexInfo", {
         itemType="Product" 
         title="Products" 
         :results="hex.products"
+        @heatmap="showHeatMap"
         @modal="openModal" />
       <CollapsableList
         itemType="Client" 

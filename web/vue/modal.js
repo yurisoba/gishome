@@ -3,7 +3,12 @@ Vue.component("ProductModal", {
     <Modal @close="$emit('close')">
         <h3 slot="header">{{name}}</h3>
         <div slot="body">
-          <ListWrapper v-if="time" title="Time" :info="time"/>
+          <Chart 
+            v-if="time" 
+            title="Time" 
+            chartType="line"
+            :chartId="pId + 'time'" 
+            :info="time"/>
           <div v-else>
             <span>No available data 😭</span>
           </div>
@@ -41,9 +46,24 @@ Vue.component("ClientModal", {
     <Modal @close="$emit('close')">
         <h3 slot="header">{{name}}</h3>
         <div slot="body">
-          <ListWrapper v-if="time" title="Time" :info="time"/>
-          <ListWrapper v-if="categories" title="Categories" :info="categories"/>
-          <ListWrapper v-if="suppliers" title="Suppliers" :info="suppliers"/>
+          <Chart 
+            v-if="time" 
+            title="Time" 
+            chartType="line"
+            :chartId="cId + 'time'" 
+            :info="time"/>
+          <Chart 
+            v-if="categories" 
+            title="Categories" 
+            chartType="pie"
+            :chartId="cId + 'categories'" 
+            :info="categories"/>
+          <Chart 
+            v-if="suppliers" 
+            title="Suppliers" 
+            chartType="pie"
+            :chartId="cId + 'supplier'" 
+            :info="suppliers"/>
           <div v-if="!time && !suppliers && !categories">
             <span>No available data 😭</span>
           </div>
@@ -62,7 +82,7 @@ Vue.component("ClientModal", {
       return this.info.customer_id || false;
     },
     name() {
-      return this.info.name || "Unlabeled";
+      return this.info.customer_id || "Unlabeled";
     },
   },
   mounted() {

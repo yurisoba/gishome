@@ -91,6 +91,7 @@ header {
   flex-direction: row;
 }
 
+.collapse-body .body-wrapper,
 .list-wrapper,
 .modal-body .info,
 .modal-container,
@@ -113,6 +114,7 @@ header {
   flex: 3;
   color: black;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .modal-footer {
@@ -141,6 +143,7 @@ header {
   margin-bottom: 5px;
 }
 
+.chart-wrapper h4,
 .list-wrapper h4 {
   color: rgb(255, 0, 132);
 }
@@ -441,7 +444,7 @@ h1 {
   max-height: 100px;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 700px) {
   .main-map-view-container {
     flex-direction: column;
   }

@@ -28,6 +28,7 @@ Vue.component("CollapsableList", {
           :info="values" 
           :collapsed="expanded !== i"
           @toogle="onToogle"
+          @heatmap="$emit('heatmap', values)"
           @openDetail="$emit('modal', itemType, values)"/>
       </div>
     </div>
@@ -52,7 +53,8 @@ Vue.component("Product", {
         </div>
       </div>
       <div class="body-wrapper" slot="body">
-        <span class="modal-trigger" @click="$emit('openDetail', info)">See details</span>
+        <span class="modal-trigger" @click="$emit('openDetail', info)">Open details</span>
+        <span class="modal-trigger" @click="$emit('heatmap', info)">Open heatmap</span>
         <div class="info">
           <span class="data" v-for="(val, key, j) in this.info" :key="j">
             <b>{{ key }}:</b> {{ val }}
@@ -80,7 +82,7 @@ Vue.component("Client", {
         </div>
       </div>
       <div class="body-wrapper" slot="body">
-        <span class="modal-trigger" @click="$emit('openDetail', info)">See details</span>
+        <span class="modal-trigger" @click="$emit('openDetail', info)">Open details</span>
         <DetailList :info="this.info"/>
       </div>
   </Collapsable>`,

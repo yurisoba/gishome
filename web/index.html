@@ -10,12 +10,14 @@
     <!-- google charts -->
 
     <!-- graph -->
+    <script src="https://unpkg.com/webcola/WebCola/cola.min.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js"
       integrity="sha512-gEWKnYYa1/1c3jOuT9PR7NxiVI1bwn02DeJGsl+lMVQ1fWMNvtjkjxIApTdbJ/wcDjQmbf+McWahXwipdC9bGA=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
+    <script src="https://cytoscape.org/cytoscape.js-cola/cytoscape-cola.js"></script>
     <!-- graph -->
 
     <!-- mapbox -->
@@ -31,6 +33,10 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="./vue/components.js" type="module"></script>
     <!-- vue -->
+
+    <!-- neo4j -->
+    <script src="https://unpkg.com/neo4j-driver@5.3.0/lib/browser/neo4j-web.min.js"></script>
+    <!-- neo4j -->
 
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -68,13 +74,61 @@
             },
           },
         ],
+        layout: {name: "cola"},
       });
+      const layout = cy.layout({name:"cola"});
 
-      var eles = cy.add([
-        { group: "nodes", data: { id: "n0" }, position: { x: 100, y: 100 } },
-        { group: "nodes", data: { id: "n1" }, position: { x: 200, y: 200 } },
-        { group: "edges", data: { id: "e0", source: "n0", target: "n1" } },
-      ]);
+      const driver = neo4j.driver(
+              "bolt://localhost",
+              neo4j.auth.basic("neo4j", "helios")
+      );
+      const result = {};
+      const session = driver.session({ defaultAccessMode: neo4j.session.READ });
+      session
+              .run(`MATCH p = (a:Product {id:4294424})-[:CONTAINS*4..4]-(b:Product)
+RETURN *
+LIMIT 100`, {product:4294424})
+              .subscribe({
+                onNext: record => {
+                  const p = record.get("p");
+                  result[p.end.elementId] = {
+                    node: p.end.properties,
+                    path: p.segments,
+                  };
+                },
+                onCompleted: () => {
+                  const nodes = {};
+                  const edges = {};
+                  for (const [eid, e] of Object.entries(result)) {
+                    //let prevEnd = null;
+                    e.path.forEach(r => {
+                      nodes[r.start.elementId] = r.start.properties;
+                      nodes[r.start.elementId].label = r.start.labels[0];
+                      nodes[r.end.elementId] = r.end.properties;
+                      nodes[r.end.elementId].label = r.end.labels[0];
+                      let edgeid = r.start.elementId + r.end.elementId;
+                      edges[edgeid] = {start: r.start.elementId, end: r.end.elementId};
+                      //edges[r.start.elementId] = r.end.elementId;
+                      //prevEnd =  r.end.elementId;
+                    });
+                    nodes[eid] = e.node;
+                    nodes[eid].is_end = true;
+                    nodes[eid].label = "Product";
+                  }
+                  const add = [];
+                  for (const [id, n] of Object.entries(nodes)) {
+                    let data = n;
+                    data.id = id;
+                    add.push({group: "nodes", data: data});
+                  }
+                  for (const [eid, e] of Object.entries(edges)) {
+                    add.push({group: "edges", data: {id: eid, source: e.start, target: e.end}})
+                  }
+
+                  cy.add(add);
+                  layout.run();
+                },
+              });
     </script>
   </body>
 </html>

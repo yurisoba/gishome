@@ -48,7 +48,8 @@ header {
 #map {
   min-width: 300px;
   width: 100%;
-  height: 92vh;
+  height: 100%;
+  min-height: 92vh;
 }
 
 .mapboxgl-popup-content {
@@ -158,7 +159,8 @@ header {
 .info-container {
   flex: 1;
   padding: 10px;
-  height: 94vh;
+  height: 100%;
+  min-height: 94vh;
   min-width: 350px;
 }
 
@@ -384,11 +386,6 @@ h1 {
   max-height: 100%;
 }
 
-.information .results-container {
-  max-height: 79.5vh;
-  overflow: hidden;
-}
-
 .information .results-container .results .collapse-list-results .collapse-list,
 .information .results-container .results .collapse-list-results,
 .information .results-container {
@@ -399,7 +396,7 @@ h1 {
   display: flex;
   flex-direction: column;
   flex: 1;
-  max-height: 33%;
+  max-height: 50%;
   padding: 5px;
   border: solid 1px rgba(85, 85, 85, 0.8);
   border-radius: 5px;
@@ -443,6 +440,12 @@ h1 {
   max-width: 100px;
   max-height: 100px;
 }
+@media only screen and (min-width: 700px) {
+  .map-container {
+    position: sticky;
+    top: 0;
+  }
+}
 
 @media only screen and (max-width: 700px) {
   .main-map-view-container {
@@ -451,6 +454,7 @@ h1 {
 
   .map-container {
     height: 50vh;
+    overflow: hidden;
   }
 
   #map {

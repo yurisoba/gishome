@@ -7,6 +7,7 @@ Vue.component("ProductModal", {
             v-if="time" 
             title="Time" 
             chartType="line"
+            :cols="{'name': 'string', 'count': 'number'}"
             :chartId="pId + 'time'" 
             :info="time"/>
           <div v-else>
@@ -50,18 +51,21 @@ Vue.component("ClientModal", {
             v-if="time" 
             title="Time" 
             chartType="line"
+            :cols="{'name': 'string', 'count': 'number'}"
             :chartId="cId + 'time'" 
             :info="time"/>
           <Chart 
             v-if="categories" 
             title="Categories" 
             chartType="pie"
+            :cols="{'name': 'string', 'count': 'number'}"
             :chartId="cId + 'categories'" 
             :info="categories"/>
           <Chart 
             v-if="suppliers" 
             title="Suppliers" 
             chartType="pie"
+            :cols="{'name': 'string', 'count': 'number'}"
             :chartId="cId + 'supplier'" 
             :info="suppliers"/>
           <div v-if="!time && !suppliers && !categories">

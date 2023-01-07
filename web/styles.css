@@ -153,7 +153,7 @@ header {
 .col {
   display: flex;
   flex-direction: column;
-  flex-basis: 350px;
+  flex-basis: 450px;
 }
 
 .info-container {
@@ -161,7 +161,7 @@ header {
   padding: 10px;
   height: 100%;
   min-height: 94vh;
-  min-width: 350px;
+  min-width: 450px;
 }
 
 .input-form {
@@ -316,10 +316,6 @@ h1 {
   text-align: center;
 }
 
-.graph-container {
-  padding: 20px;
-}
-
 /* collapsable */
 
 .collapse-container {
@@ -449,14 +445,15 @@ h1 {
   max-width: 100px;
   max-height: 100px;
 }
-@media only screen and (min-width: 700px) {
+
+@media only screen and (min-width: 930px) {
   .map-container {
     position: sticky;
     top: 3%;
   }
 }
 
-@media only screen and (max-width: 700px) {
+@media only screen and (max-width: 930px) {
   .main-map-view-container {
     flex-direction: column;
   }
@@ -473,6 +470,10 @@ h1 {
   h1 {
     font-size: 20px;
   }
+
+  .info-container {
+    min-width: auto;
+  }
 }
 
 @media only screen and (max-width: 450px) {
@@ -483,4 +484,21 @@ h1 {
   .views {
     max-width: none;
   }
+}
+
+/* graph */
+.graph-container {
+  background-color: #a8bbbf;
+}
+
+.graph {
+  width: 100%;
+  height: 100%;
+  min-width: 80vh;
+  min-height: 94vh;
+}
+
+.graph-container.hide {
+  height: 0;
+  overflow: hidden;
 }

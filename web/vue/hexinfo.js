@@ -15,7 +15,9 @@ Vue.component("HexInfo", {
       this.show[itemType] = true;
     },
     onHeatMap(values) {
-      this.$emit("heatmap", values);
+      if (values.id) {
+        this.$emit("heatmap", values);
+      }
     },
   },
   template: `

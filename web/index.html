@@ -10,12 +10,12 @@
     <!-- google charts -->
 
     <!-- graph -->
-    <!-- <script
+    <script
       src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js"
       integrity="sha512-gEWKnYYa1/1c3jOuT9PR7NxiVI1bwn02DeJGsl+lMVQ1fWMNvtjkjxIApTdbJ/wcDjQmbf+McWahXwipdC9bGA=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
-    ></script> -->
+    ></script>
     <!-- graph -->
 
     <!-- mapbox -->
@@ -38,5 +38,43 @@
     <section id="app_component">
       <Info />
     </section>
+    <section id="cy_container" class="graph-container hide">
+      <div id="cy" class="graph"></div>
+    </section>
+    <script>
+      var colors = {
+        enfasis: "#FF0084",
+      };
+      var cy = cytoscape({
+        container: document.getElementById("cy"),
+        style: [
+          // the stylesheet for the graph
+          {
+            selector: "node",
+            style: {
+              "background-color": "#666",
+              label: "data(id)",
+            },
+          },
+
+          {
+            selector: "edge",
+            style: {
+              width: 3,
+              "line-color": colors.enfasis,
+              "target-arrow-color": colors.enfasis,
+              "target-arrow-shape": "triangle",
+              "curve-style": "bezier",
+            },
+          },
+        ],
+      });
+
+      var eles = cy.add([
+        { group: "nodes", data: { id: "n0" }, position: { x: 100, y: 100 } },
+        { group: "nodes", data: { id: "n1" }, position: { x: 200, y: 200 } },
+        { group: "edges", data: { id: "e0", source: "n0", target: "n1" } },
+      ]);
+    </script>
   </body>
 </html>

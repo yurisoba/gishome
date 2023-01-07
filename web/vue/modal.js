@@ -7,7 +7,7 @@ Vue.component("ProductModal", {
             v-if="time" 
             title="Time" 
             chartType="line"
-            :cols="{'name': 'string', 'count': 'number'}"
+            :cols="{'month': 'date', 'count': 'number'}"
             :chartId="pId + 'time'" 
             :info="time"/>
           <div v-else>
@@ -37,7 +37,7 @@ Vue.component("ProductModal", {
   methods: {
     async fetchInfo() {
       const time = await (await fetch(`/time/product/${this.pId}`)).json();
-      this.time = time.array || [];
+      this.time = time || [];
     },
   },
 });
@@ -51,21 +51,21 @@ Vue.component("ClientModal", {
             v-if="time" 
             title="Time" 
             chartType="line"
-            :cols="{'name': 'string', 'count': 'number'}"
+            :cols="{'month': 'date', 'count': 'number'}"
             :chartId="cId + 'time'" 
             :info="time"/>
           <Chart 
             v-if="categories" 
             title="Categories" 
             chartType="pie"
-            :cols="{'name': 'string', 'count': 'number'}"
+            :cols="{'supplier': 'string', 'count': 'number'}"
             :chartId="cId + 'categories'" 
             :info="categories"/>
           <Chart 
             v-if="suppliers" 
             title="Suppliers" 
             chartType="pie"
-            :cols="{'name': 'string', 'count': 'number'}"
+            :cols="{'supplier': 'string', 'count': 'number'}"
             :chartId="cId + 'supplier'" 
             :info="suppliers"/>
           <div v-if="!time && !suppliers && !categories">
@@ -100,9 +100,9 @@ Vue.component("ClientModal", {
       const suppliers = await (await fetch(`/suppliers/${this.cId}`)).json();
       const time = await (await fetch(`/time/customer/${this.cId}`)).json();
 
-      this.categories = categories.array || [];
-      this.suppliers = suppliers.array || [];
-      this.time = time.array || [];
+      this.categories = categories || [];
+      this.suppliers = suppliers || [];
+      this.time = time || [];
     },
   },
 });

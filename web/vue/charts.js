@@ -18,8 +18,14 @@ Vue.component("Chart", {
     getChartData() {
       let data = this.info.map((x) => {
         let d = [];
-        Object.keys(this.cols).forEach((key) => {
-          d.push(x[key]);
+        Object.entries(this.cols).forEach((entry) => {
+          let [key, value] = entry;
+          let val = x[key];
+          if (value == "date") {
+            val = new Date(Date.parse(x[key]));
+            val = val.toLocaleString("default", { month: "long" });
+          }
+          d.push(val);
         });
         return d;
       });
@@ -29,7 +35,8 @@ Vue.component("Chart", {
       // Define the chart to be drawn.
       var data = new google.visualization.DataTable();
       Object.entries(this.cols).forEach((entry) => {
-        const [key, value] = entry;
+        let [key, value] = entry;
+        if (value == "date") value = "string";
         data.addColumn(value, key);
       });
 

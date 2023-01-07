@@ -1,7 +1,6 @@
 import "./map.js";
 import "./modal.js";
 import "./hexinfo.js";
-import "./graph.js";
 import "./form.js";
 import "./collapsable.js";
 import "./charts.js";
@@ -10,6 +9,7 @@ Vue.component("Info", {
   name: "info",
   data() {
     return {
+      graph_container: document.getElementById("cy_container"),
       actionType: "init",
       picked_view: "map_view",
       results: {
@@ -28,6 +28,15 @@ Vue.component("Info", {
       hexagons: [],
       mapProps: {},
     };
+  },
+  watch: {
+    picked_view(nVal) {
+      if (nVal == "map_view") {
+        this.graph_container.classList.add("hide");
+      } else {
+        this.graph_container.classList.remove("hide");
+      }
+    },
   },
   methods: {
     onPicked(picked) {
@@ -112,7 +121,7 @@ Vue.component("Info", {
         <label for="graph_view" :class="picked_view=='graph_view'?'active':''">Graph View</label>
       </div>
     </header>
-    <div v-if="picked_view=='map_view'" class="main-map-view-container">
+    <div v-show="picked_view=='map_view'" class="main-map-view-container">
       <Map 
         @hexClick="onHexClick" 
         :hexagons="hexagons"
@@ -145,9 +154,6 @@ Vue.component("Info", {
             @heatmap="getHeatMap"/>
         </div>
       </div>
-    </div>
-    <div v-else class="main-graph-view-container">
-     <Graph/>
     </div>
   </div>
  `,

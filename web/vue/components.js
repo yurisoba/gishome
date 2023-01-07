@@ -68,7 +68,7 @@ Vue.component("Info", {
       let p_id = values.id;
       const data = await (await fetch(`/heatmap/${p_id}`)).json();
       console.log("from components.js, getHeatMap", data);
-      let h = data.array.map((x) => this.hexIdToInt(x["name"]));
+      let h = data.map((x) => this.hexIdToInt(x["hex"]));
 
       // these two values will be sent to the map automatically when updated
       this.hexagons = h;

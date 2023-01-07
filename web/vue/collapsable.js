@@ -59,7 +59,11 @@ Vue.component("Product", {
         </div>
       </div>
       <div class="body-wrapper" slot="body">
-        <span class="modal-trigger" @click="$emit('openDetail', info)">Open details</span>
+        <span v-if="info.id" 
+          class="modal-trigger" 
+          @click="$emit('openDetail', info)">
+          Open details
+        </span>
         <div class="info">
           <span class="data" v-for="(val, key, j) in this.info" :key="j">
             <b>{{ key }}:</b> {{ val }}

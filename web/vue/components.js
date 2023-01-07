@@ -15,17 +15,19 @@ Vue.component("Info", {
         modalShow: false,
         info: {},
       },
+      hexResults: {
+        loading: false,
+        products: [],
+        clients: [],
+        stats: [],
+      },
       hexagons: [],
       actionType: "init",
     };
   },
   methods: {
-    onHexClick(hexData) {
-      this.actionType = "hex";
-      this.$refs.form.hexPicked();
-      this.getMostProduct(hexData.id);
-
-      console.log(this.actionType);
+    onPicked(picked) {
+      this.actionType = picked;
     },
     onFormSubmit(formData) {
       this.actionType = formData.picked;
@@ -45,16 +47,26 @@ Vue.component("Info", {
     onHexClick(hexData) {
       this.getMostProduct(hexData.id);
       this.$refs.form.hexPicked();
+      this.hexResults.loading = true;
     },
     openModal(itemType, values) {
       this.results.info = values;
       this.results.modalShow = true;
     },
     async getMostProduct(hexId) {
-      const hstr = this.hexIdToString(hexId);
-      const products = await (await fetch(`/most/${hstr}`)).json();
-      this.results.products = products;
       this.hexagons = [hexId];
+
+      let h = this.hexIdToString(hexId);
+      const products = await (await fetch(`/most/${h}`)).json();
+      const stats = await (await fetch(`/stats/${h}`)).json();
+      const clients = await (await fetch(`/loyal/${h}`)).json();
+
+      this.hexResults = {
+        loading: false,
+        products,
+        stats,
+        clients,
+      };
     },
     async findProduct(p_name) {
       const products = await (await fetch(`/product/${p_name}`)).json();
@@ -84,23 +96,25 @@ Vue.component("Info", {
           <Form 
             class="form-container"
             ref="form"
-            :form_values="results" 
+            :form_values="results"
+            @picked="onPicked" 
             @submit="onFormSubmit"/>
-          <div v-if="actionType=='name'"
+          <div v-if="actionType =='name'"
             class="results-container">
             <div class="results">
               <CollapsableList
+                class="only"
                 itemType="Product" 
                 title="Products" 
                 :results="results.products"
                 @modal="openModal" />
-              <ProductModal v-if="results.modalShow" :info="info" @close="results.modalShow = false"/>
+              <ProductModal v-if="results.modalShow" :info="results.info" @close="results.modalShow = false"/>
             </div>
           </div>
           <HexInfo 
-            v-else-if="actionType=='hex'"
+            v-else-if="actionType =='hex'"
             class="results-container"
-            :hex="hexagons"/>
+            :hex="this.hexResults"/>
         </div>
       </div>
     </div>

@@ -79,7 +79,6 @@ Vue.component("Map", {
           .setLngLat(e.lngLat)
           .setHTML(
             `<div class="popup-info">
-              <span><b>hexId:</b> ${hexData.id}</span>
               <span><b>count:</b> ${hexData.count}</span>
             </div>`
           )

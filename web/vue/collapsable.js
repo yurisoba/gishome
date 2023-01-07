@@ -66,7 +66,7 @@ Vue.component("Client", {
   props: ["collapsed", "info", "num"],
   computed: {
     title() {
-      return this.info.name;
+      return this.info.customer_id;
     },
   },
   template: `
@@ -81,11 +81,7 @@ Vue.component("Client", {
       </div>
       <div class="body-wrapper" slot="body">
         <span class="modal-trigger" @click="$emit('openDetail', info)">See details</span>
-        <div class="info">
-          <span class="data" v-for="(val, key, j) in this.info" :key="j">
-            <b>{{ key }}:</b> {{ val }}
-          </span>
-        </div>
+        <DetailList :info="this.info"/>
       </div>
   </Collapsable>`,
 });
@@ -106,8 +102,8 @@ Vue.component("Collapsable", {
         </slot>
       </div>
       <div class="icon" @click="$emit('toogle')">
-        <span v-if="!collapsed">x</span>
-        <span v-else>V</span>
+        <span v-if="!collapsed">△</span>
+        <span v-else>▽</span>
       </div>
     </div>
 

@@ -7,6 +7,9 @@ Vue.component("Form", {
     };
   },
   watch: {
+    picked(value) {
+      this.$emit("picked", value);
+    },
     productName(value) {
       this.productName = value;
       this.msg["productName"] = "";

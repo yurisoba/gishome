@@ -74,8 +74,8 @@ header {
 }
 
 .modal-container {
-  width: 85%;
-  height: 85%;
+  max-width: 50%;
+  max-height: 80vh;
   margin: 0px auto;
   padding: 20px;
   background-color: #fff;
@@ -91,6 +91,8 @@ header {
   flex-direction: row;
 }
 
+.list-wrapper,
+.modal-body .info,
 .modal-container,
 .modal-body {
   display: flex;
@@ -109,6 +111,8 @@ header {
 .modal-body {
   margin: 20px 0;
   flex: 3;
+  color: black;
+  overflow-y: scroll;
 }
 
 .modal-footer {
@@ -124,19 +128,35 @@ header {
   border-radius: 4px;
 }
 
-/* info */
+/* list wrapper */
+.list-wrapper-container {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
 
+.list-item-wrapper {
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+.list-wrapper h4 {
+  color: rgb(255, 0, 132);
+}
+
+/* info */
 .col {
   display: flex;
   flex-direction: column;
-  flex-basis: 300px;
+  flex-basis: 350px;
 }
 
 .info-container {
   flex: 1;
   padding: 10px;
-  height: 91vh;
-  min-width: 300px;
+  height: 94vh;
+  min-width: 350px;
 }
 
 .input-form {
@@ -206,7 +226,7 @@ h1,
 }
 
 .result-list {
-  overflow-y: auto;
+  overflow-y: scroll;
   max-height: 50%;
   height: 100%;
   padding: 0;
@@ -228,8 +248,13 @@ h1,
   min-width: 50px;
 }
 
-.result-list .item h4 {
+.result-list .item .title {
   padding: 0 10px;
+  overflow: hidden;
+}
+
+.result-list .item h4 {
+  max-width: 100%;
 }
 
 .input-form .options input:disabled + label {
@@ -248,6 +273,7 @@ h1,
   background-color: rgba(217, 90, 155, 0.7);
 }
 
+.list-item-wrapper,
 .input-form,
 .result-list .item {
   background-color: rgba(217, 90, 155, 0.19);
@@ -262,7 +288,7 @@ h1 {
 }
 
 .views {
-  max-width: 300px;
+  max-width: 230px;
   padding: 0;
   background-color: rgba(85, 85, 85, 0.8);
 }
@@ -355,6 +381,11 @@ h1 {
   max-height: 100%;
 }
 
+.information .results-container {
+  max-height: 79.5vh;
+  overflow: hidden;
+}
+
 .information .results-container .results .collapse-list-results .collapse-list,
 .information .results-container .results .collapse-list-results,
 .information .results-container {
@@ -369,7 +400,11 @@ h1 {
   padding: 5px;
   border: solid 1px rgba(85, 85, 85, 0.8);
   border-radius: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+}
+
+.information .results-container .results .collapse-list-container.only {
+  max-height: 100%;
 }
 
 .information
@@ -379,6 +414,31 @@ h1 {
   .collapse-list-results
   .result-list.collapse-list {
   max-height: 90%;
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 20px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a8bbbf;
+}
+
+.loading {
+  max-width: 100px;
+  max-height: 100px;
 }
 
 @media only screen and (max-width: 600px) {

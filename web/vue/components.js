@@ -1,25 +1,40 @@
 import "./map.js";
 import "./modal.js";
+import "./hexinfo.js";
 import "./graph.js";
 import "./form.js";
+import "./collapsable.js";
+import "./charts.js";
 
 Vue.component("Info", {
   name: "info",
   data() {
     return {
-      picked_view: "map_view",
-      product: [],
-      hexagons: [],
       actionType: "init",
+      picked_view: "map_view",
+      results: {
+        products: [],
+        modalShow: false,
+        info: {},
+      },
+      hexResults: {
+        loading: false,
+        suppliers: [],
+        products: [],
+        clients: [],
+        stats: [],
+      },
+      // these two values will be sent to the map automatically when updated
+      hexagons: [],
+      mapProps: {},
     };
   },
   methods: {
-    onHexClick(hexData) {
-      this.getMostProduct(hexData.id);
+    onPicked(picked) {
+      this.actionType = picked;
     },
     onFormSubmit(formData) {
       this.actionType = formData.picked;
-
       switch (formData.picked) {
         case "id":
           this.findProductHex(formData.productId);
@@ -30,20 +45,60 @@ Vue.component("Info", {
           break;
       }
     },
-    async getMostProduct(hexId) {
-      const hstr = "85" + hexId.toString(16);
-      const product = await (await fetch(`/most/${hstr}`)).json();
-      this.product = product;
+    hexIdToString(hexId) {
+      return hexId ? "85" + hexId.toString(16) : "";
+    },
+    hexIdToInt(hexId) {
+      return Number("0x" + hexId.substr(2));
+    },
+    onHexClick(hexData) {
+      this.hexagons = [hexData.id];
+      this.$refs.form.hexPicked();
+      this.hexResults.loading = true;
+      this.getHexData(hexData.id);
+    },
+    openModal(itemType, values) {
+      this.results.info = values;
+      this.results.modalShow = true;
+    },
+    showHeatMap(values) {
+      this.getHeatMap(values.id);
+    },
+    async getHeatMap(values) {
+      let p_id = values.id;
+      const data = await (await fetch(`/heatmap/${p_id}`)).json();
+      console.log("from components.js, getHeatMap", data);
+      let h = data.array.map((x) => this.hexIdToInt(x["name"]));
+
+      // these two values will be sent to the map automatically when updated
+      this.hexagons = h;
+      this.mapProps = data;
+    },
+    async getHexData(hexId) {
       this.hexagons = [hexId];
+
+      let h = this.hexIdToString(hexId);
+      const products = await (await fetch(`/most/${h}`)).json();
+      const suppliers = await (await fetch(`/mostsupply/${h}`)).json();
+      const stats = await (await fetch(`/stats/${h}`)).json();
+      const clients = await (await fetch(`/loyal/${h}`)).json();
+
+      this.hexResults = {
+        loading: false,
+        suppliers,
+        products,
+        stats,
+        clients,
+      };
     },
     async findProduct(p_name) {
-      const product = await (await fetch(`/product/${p_name}`)).json();
-      this.product = product;
+      const products = await (await fetch(`/product/${p_name}`)).json();
+      this.results.products = products;
     },
     async findProductHex(p_id) {
       const hexagons = await (await fetch(`/hex/${p_id}`)).json();
       this.hexagons = hexagons;
-      this.product = [];
+      this.results.products = [];
     },
   },
   template: `
@@ -58,11 +113,36 @@ Vue.component("Info", {
       </div>
     </header>
     <div v-if="picked_view=='map_view'" class="main-map-view-container">
-      <Map @hexClick="onHexClick" v-bind:hexagons="hexagons"/>
+      <Map 
+        @hexClick="onHexClick" 
+        :hexagons="hexagons"
+        :info="mapProps"/>
       <div class="info-container col">
         <div class="information">
-          <Form v-bind:form_values="product" @submit="onFormSubmit"/>
-          <Results v-bind:results_prop="product" v-bind:actionType="actionType" v-bind:hexagons="hexagons"/>
+          <Form 
+            class="form-container"
+            ref="form"
+            :form_values="results"
+            @picked="onPicked" 
+            @submit="onFormSubmit"/>
+          <div v-if="actionType =='name'"
+            class="results-container">
+            <div class="results">
+              <CollapsableList
+                class="only"
+                itemType="Product" 
+                title="Products" 
+                :results="results.products"
+                @heatmap="getHeatMap"
+                @modal="openModal" />
+              <ProductModal v-if="results.modalShow" :info="results.info" @close="results.modalShow = false"/>
+            </div>
+          </div>
+          <HexInfo 
+            v-else-if="actionType =='hex'"
+            class="results-container"
+            :hex="this.hexResults"
+            @heatmap="getHeatMap"/>
         </div>
       </div>
     </div>
@@ -71,41 +151,6 @@ Vue.component("Info", {
     </div>
   </div>
  `,
-});
-
-Vue.component("Results", {
-  props: ["results_prop", "hexagons", "actionType"],
-  data() {
-    return {
-      show: false,
-      info: {},
-    };
-  },
-  methods: {
-    openModal(productValues) {
-      this.info = productValues;
-      this.show = true;
-    },
-  },
-  template: `<div class="results">
-    <ul class="result-list" v-if="results_prop.length > 0">
-      <li class="item" v-for="(values, i) in results_prop"  v-bind:key="i" @click="openModal(values)">
-        <div class="key"><span class="number">{{++i}}</span></div>
-        <div class="info">
-          <span class="data" v-for="(val, key, j) in values" v-bind:key="j">
-            <b>{{ key }}:</b> {{ val }}
-          </span>
-        </div>
-      </li>
-    </ul>
-    <div class="center" v-else-if="actionType=='name'">
-      <span>200 No results 🙃</span>
-    </div>
-    <div class="center" v-else-if="actionType=='id' && hexagons.length == 0">
-      <span>404 Id not found 😭</span>
-    </div>
-    <ProductModal v-if="show" :info="info" @close="show = false"/>
-  </div>`,
 });
 
 // attach to index.html

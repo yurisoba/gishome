@@ -10,6 +10,6 @@ Vue.component("Graph", {
     };
   },
   mounted() {
-    console.log("fetch information");
+    console.log("fetch graph information");
   },
 });

@@ -22,7 +22,6 @@ body {
 }
 
 .input-form,
-.result-list,
 header {
   box-shadow: 0 0 10px 1px black;
 }
@@ -49,7 +48,7 @@ header {
 #map {
   min-width: 300px;
   width: 100%;
-  height: 91.5vh;
+  height: 92vh;
 }
 
 .mapboxgl-popup-content {
@@ -75,8 +74,8 @@ header {
 }
 
 .modal-container {
-  width: 85%;
-  height: 85%;
+  max-width: 50%;
+  max-height: 80vh;
   margin: 0px auto;
   padding: 20px;
   background-color: #fff;
@@ -92,6 +91,9 @@ header {
   flex-direction: row;
 }
 
+.collapse-body .body-wrapper,
+.list-wrapper,
+.modal-body .info,
 .modal-container,
 .modal-body {
   display: flex;
@@ -110,6 +112,9 @@ header {
 .modal-body {
   margin: 20px 0;
   flex: 3;
+  color: black;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .modal-footer {
@@ -125,19 +130,36 @@ header {
   border-radius: 4px;
 }
 
-/* info */
+/* list wrapper */
+.list-wrapper-container {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
 
+.list-item-wrapper {
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+.chart-wrapper h4,
+.list-wrapper h4 {
+  color: rgb(255, 0, 132);
+}
+
+/* info */
 .col {
   display: flex;
   flex-direction: column;
-  flex-basis: 300px;
+  flex-basis: 350px;
 }
 
 .info-container {
   flex: 1;
   padding: 10px;
-  height: 91vh;
-  min-width: 300px;
+  height: 94vh;
+  min-width: 350px;
 }
 
 .input-form {
@@ -191,8 +213,12 @@ h1,
   color: gray;
 }
 
+.input-form .options label {
+  border-right: 1px solid rgb(89, 42, 66);
+}
+
 .views label:hover,
-.input-form .options label:hover {
+.input-form .options input:enabled + label:hover {
   color: white;
   background-color: rgba(217, 90, 155, 0.9);
 }
@@ -203,9 +229,8 @@ h1,
 }
 
 .result-list {
-  list-style-type: none;
-  overflow-y: auto;
-  max-height: 71vh;
+  overflow-y: scroll;
+  max-height: 50%;
   height: 100%;
   padding: 0;
   margin: 0;
@@ -213,11 +238,12 @@ h1,
 
 .result-list .item {
   display: flex;
+  flex: 1;
   flex-direction: row;
   flex-wrap: nowrap;
-  margin-bottom: 2px;
 }
 
+.result-list .item .title,
 .result-list .item .key {
   display: flex;
   justify-content: center;
@@ -225,18 +251,32 @@ h1,
   min-width: 50px;
 }
 
-.result-list .item .info {
-  display: flex;
-  flex-direction: column;
+.result-list .item .title {
   padding: 0 10px;
+  overflow: hidden;
+}
+
+.result-list .item h4 {
+  max-width: 100%;
+}
+
+.input-form .options input:disabled + label {
+  cursor: not-allowed;
+}
+
+.views label,
+.input-form .options input:enabled + label {
+  cursor: pointer;
 }
 
 .modal-default-button:hover,
+.collapse-header .icon:hover,
 .result-list .item .key,
 .input-form .options label.active {
   background-color: rgba(217, 90, 155, 0.7);
 }
 
+.list-item-wrapper,
 .input-form,
 .result-list .item {
   background-color: rgba(217, 90, 155, 0.19);
@@ -251,11 +291,12 @@ h1 {
 }
 
 .views {
-  max-width: 300px;
+  max-width: 230px;
   padding: 0;
   background-color: rgba(85, 85, 85, 0.8);
 }
 
+.collapse-header .icon,
 .modal-default-button,
 .views label.active,
 .enfasis {
@@ -277,7 +318,133 @@ h1 {
   padding: 20px;
 }
 
-@media only screen and (max-width: 600px) {
+/* collapsable */
+
+.collapse-container {
+  margin-bottom: 2px;
+}
+
+.collapse-header {
+  display: flex;
+  flex-direction: row;
+}
+
+.collapse-body,
+.collapse-header > * {
+  display: flex;
+  overflow: hidden;
+}
+
+.collapse-header .icon {
+  width: 30px;
+  padding: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collapse-h-slot {
+  flex: 1;
+}
+
+.collapse-body {
+  height: 0;
+  flex-direction: column;
+}
+
+.collapse-body.expanded {
+  height: 100%;
+}
+
+.collapse-body .body-wrapper {
+  padding: 10px;
+}
+
+.collapse-body .info {
+  display: flex;
+  flex-direction: column;
+}
+
+.collapse-body .modal-trigger {
+  cursor: pointer;
+  font-weight: bold;
+  color: rgba(255, 0, 132, 0.9);
+}
+
+/* information */
+.information .results-container .results .collapse-list-results .collapse-list,
+.information .results-container .results .collapse-list-results,
+.information .results-container .results,
+.information .results-container,
+.information {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+}
+
+.information .results-container {
+  max-height: 79.5vh;
+  overflow: hidden;
+}
+
+.information .results-container .results .collapse-list-results .collapse-list,
+.information .results-container .results .collapse-list-results,
+.information .results-container {
+  flex: 1;
+}
+
+.information .results-container .results .collapse-list-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  max-height: 33%;
+  padding: 5px;
+  border: solid 1px rgba(85, 85, 85, 0.8);
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+.information .results-container .results .collapse-list-container.only {
+  max-height: 100%;
+}
+
+.information
+  .results-container
+  .results
+  .collapse-list-container
+  .collapse-list-results
+  .result-list.collapse-list {
+  max-height: 85%;
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 20px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a8bbbf;
+}
+
+.loading {
+  max-width: 100px;
+  max-height: 100px;
+}
+
+@media only screen and (max-width: 700px) {
   .main-map-view-container {
     flex-direction: column;
   }

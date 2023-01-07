@@ -68,10 +68,20 @@ Vue.component("Info", {
       let p_id = values.id;
       const data = await (await fetch(`/heatmap/${p_id}`)).json();
       console.log("from components.js, getHeatMap", data);
-      let h = data.array.map((x) => this.hexIdToInt(x["name"]));
+      let sum = 0;
+      data.forEach((obj) => {
+          sum += obj.count;
+      });
+      const nv = {
+          array: [],
+          is_heatmap: true,
+      };
+      data.forEach((obj) => {
+          nv.array.push({hex: obj.hex, value: obj.count/sum});
+      });
 
       // these two values will be sent to the map automatically when updated
-      this.hexagons = h;
+      this.hexagons = nv;
       this.mapProps = data;
     },
     async getHexData(hexId) {

@@ -15,20 +15,33 @@ Vue.component("Map", {
         active: "rgba(123, 240, 134, 0.5)", //green
         inactive: "rgba(255, 255, 255, 0.4)", // white
       },
+      allHex: [],
     };
   },
   watch: {
     hexagons(newVal, oldVal) {
-      // here is where I colour the hexagons
-      console.log(
-        "FROM map.js, triggered every time hexagons is updated",
-        newVal
-      );
-      this.colorHex(newVal);
+      if (newVal.is_heatmap === true) {
+          this.allHex.forEach((hexId) => {
+            this.map.setFeatureState(
+              { source: "hexes", id: hexId },
+              { heatvalue: 0 }
+            );
+          });
+          newVal.array.forEach((obj) => {
+            const hexId = isNaN(obj.hex) ? Number("0x" + obj.hex.substr(2)) : obj.hex;
+            this.map.setFeatureState(
+              { source: "hexes", id: hexId },
+              { heatvalue: obj.value }
+            );
+          });
+          this.map.setLayoutProperty("heatmap-layer", "visibility", "visible");
+      } else {
+          if (oldVal.is_heatmap === true)
+            this.map.setLayoutProperty("heatmap-layer", "visibility", "none");
+          this.colorHex(newVal);
+      }
     },
     info(newVal, oldVal) {
-      // here is where I colour the hexagons
-      console.log("FROM map.js, triggered every time info is updated", newVal);
     },
   },
   mounted() {
@@ -49,7 +62,9 @@ Vue.component("Map", {
 
       const hexes = await (await fetch("/hexes")).json();
       hexes.forEach((hex) => {
-        gj.features.push(this.hexToFeature(hex));
+        const o = this.hexToFeature(hex);
+        this.allHex.push(o.id);
+        gj.features.push(o);
       });
 
       this.map.addSource("hexes", {
@@ -81,6 +96,25 @@ Vue.component("Map", {
           "text-size": 10,
         },
       });
+
+      this.map.addLayer({
+        id: "heatmap-layer",
+        type: "fill",
+        source: "hexes",
+        paint: {
+          "fill-color": [
+            "interpolate-hcl",
+            ["linear"],
+            ["feature-state", "heatvalue"],
+            0,
+            "rgba(0, 0, 255, 0.5)",
+            1,
+            "rgba(255, 0, 0, 0.5)",
+          ],
+          "fill-outline-color": "rgba(0, 0, 0, 0)",
+        },
+      });
+      this.map.setLayoutProperty("heatmap-layer", "visibility", "none");
 
       this.map.on("click", "hexes-layer", async (e) => {
         let hexData = e.features[0].properties;

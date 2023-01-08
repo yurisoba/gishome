@@ -45,9 +45,27 @@
       <Info />
     </section>
     <section id="cy_container" class="graph-container hide">
-      <div id="cy" class="graph"></div>
+      <div class="col" style="flex: 2;">
+        <div id="cy" class="graph"></div>
+      </div>
+      <div class="graph_ui col">
+        <form id="graph_form" class="input-form">
+          <div class="field">
+            <input type="text" id="graph_input" />
+          </div>
+        </form>
+        <div class="results-container">
+          <div class="results">
+            <div id="graph_result" class="result-list">
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
     <script>
+      const input = document.getElementById("graph_input");
+      const output = document.getElementById("graph_result");
+
       var colors = {
         enfasis: "#FF0084",
       };
@@ -59,12 +77,10 @@
             selector: "node",
             style: {
               'background-color': (ele) => {
-                if (ele.data().is_end === true)
-                  return "#37ffff";
                 if (ele.data().is_start === true)
                   return "#0bff0b";
                 if (ele.data().label === "Product")
-                  return "#0000fc";
+                  return "#37ffff";
                 return "#ff9900";
               },
               color: "#fff",
@@ -101,57 +117,96 @@
               "bolt://localhost",
               neo4j.auth.basic("neo4j", "helios")
       );
-      const result = {};
-      let source_id = "";
-      const session = driver.session({ defaultAccessMode: neo4j.session.READ });
-      session
-              .run(`MATCH p = (a:Product {id:4294424})-[:CONTAINS*4..4]-(b:Product)
-RETURN *
-LIMIT 100`, {product:4294424})
-              .subscribe({
-                onNext: record => {
-                  const p = record.get("p");
-                  result[p.end.elementId] = {
-                    node: p.end.properties,
-                    path: p.segments,
-                  };
-                  source_id = p.start.elementId;
-                },
-                onCompleted: () => {
-                  const nodes = {};
-                  const edges = {};
-                  for (const [eid, e] of Object.entries(result)) {
-                    //let prevEnd = null;
-                    e.path.forEach(r => {
-                      nodes[r.start.elementId] = r.start.properties;
-                      nodes[r.start.elementId].label = r.start.labels[0];
-                      nodes[r.end.elementId] = r.end.properties;
-                      nodes[r.end.elementId].label = r.end.labels[0];
-                      let edgeid = r.start.elementId + r.end.elementId;
-                      edges[edgeid] = {start: r.start.elementId, end: r.end.elementId};
-                      //edges[r.start.elementId] = r.end.elementId;
-                      //prevEnd =  r.end.elementId;
-                    });
-                    nodes[eid] = e.node;
-                    nodes[eid].is_end = true;
-                    nodes[eid].label = "Product";
-                  }
-                  nodes[source_id].is_start = true;
-                  const add = [];
-                  for (const [id, n] of Object.entries(nodes)) {
-                    let data = n;
-                    data.id = id;
-                    add.push({group: "nodes", data: data});
-                  }
-                  for (const [eid, e] of Object.entries(edges)) {
-                    add.push({group: "edges", data: {id: eid, source: e.start, target: e.end}})
-                  }
-                  console.log(add);
+      document.getElementById("graph_form").onsubmit = async (ev) => {
+        ev.preventDefault();
+        window.dispatchEvent(new Event("resize"));
 
-                  cy.add(add);
-                  cy.layout({name:"cola"}).run();
-                },
-              });
+        const result = await (await fetch ("/product/" + input.value)).json();
+        output.innerText = "";
+        result.forEach(obj => {
+          const div = document.createElement("div");
+          div.className = "item";
+          div.style.padding = "10px";
+          div.onclick = (e) => {
+            searchGraph(Number(obj.id));
+          };
+          const title = document.createElement("div");
+          title.className = "title";
+          const th4 = document.createElement("h4");
+          th4.innerText = obj.name;
+          title.appendChild(th4);
+          div.appendChild(th4);
+          output.appendChild(div);
+        });
+      };
+
+      let eles = null;
+
+      function searchGraph(searchId) {
+        if (eles)
+          cy.remove(eles);
+        const result = {};
+        let source_id = "";
+        const session = driver.session({defaultAccessMode: neo4j.session.READ});
+        session
+                .run(`MATCH p = (a:Product {id:$product})-[:CONTAINS*4..4]-(b:Product)
+RETURN *
+LIMIT 100`, {product: Number(searchId)})
+                .subscribe({
+                  onNext: record => {
+                    const p = record.get("p");
+                    if (p.end.labels[0] !== "Product")
+                      return;
+                    result[p.end.elementId] = {
+                      node: p.end.properties,
+                      path: p.segments,
+                    };
+                    source_id = p.start.elementId;
+
+                  },
+                  onCompleted: () => {
+                    if (source_id === "") {
+                      alert("No related product found (yet)...");
+                      return;
+                    }
+                    const nodes = {};
+                    const edges = {};
+                    for (const [eid, e] of Object.entries(result)) {
+                      e.path.forEach(r => {
+                        nodes[r.start.elementId] = r.start.properties;
+                        nodes[r.start.elementId].label = r.start.labels[0];
+                        nodes[r.end.elementId] = r.end.properties;
+                        nodes[r.end.elementId].label = r.end.labels[0];
+                        let edgeid = r.start.elementId + r.end.elementId;
+                        edges[edgeid] = {
+                          start: r.start.elementId,
+                          end: r.end.elementId
+                        };
+                      });
+                      nodes[eid] = e.node;
+                      nodes[eid].is_end = true;
+                      nodes[eid].label = "Product";
+                    }
+                    nodes[source_id].is_start = true;
+                    const add = [];
+                    for (const [id, n] of Object.entries(nodes)) {
+                      let data = n;
+                      data.id = id;
+                      add.push({group: "nodes", data: data});
+                    }
+                    for (const [eid, e] of Object.entries(edges)) {
+                      add.push({
+                        group: "edges",
+                        data: {id: eid, source: e.start, target: e.end}
+                      })
+                    }
+                    console.log(add);
+                    eles = cy.add(add);
+                    cy.layout({name: "cola"}).run();
+                  },
+                });
+      }
+
     </script>
   </body>
 </html>

@@ -44,7 +44,7 @@ func main() {
 	e.GET("/product/:name", func(c echo.Context) error {
                 name := c.Param("name")
                 rows, _ := pool.Query(context.Background(),
-                        `SELECT p.id, p.name, s.name
+                        `SELECT DISTINCT (p.id), p.name, s.name
 FROM product p
 JOIN suppliers s
     ON (p.supplier_id = s.id)

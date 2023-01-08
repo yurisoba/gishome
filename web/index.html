@@ -58,8 +58,28 @@
           {
             selector: "node",
             style: {
-              "background-color": "#666",
-              label: "data(id)",
+              'background-color': (ele) => {
+                if (ele.data().is_end === true)
+                  return "#37ffff";
+                if (ele.data().is_start === true)
+                  return "#0bff0b";
+                if (ele.data().label === "Product")
+                  return "#0000fc";
+                return "#ff9900";
+              },
+              color: "#fff",
+              "font-weight": (ele) => {
+                if (ele.data().is_end === true || ele.data().is_start === true)
+                  return "bold";
+                return "normal";
+              },
+              "text-background-color": "#5E5E5EBA",
+              label: (ele) => {
+                const dat = ele.data();
+                if (dat.label === "Product")
+                  return dat.name;
+                return dat.order_id;
+              },
             },
           },
 
@@ -76,13 +96,13 @@
         ],
         layout: {name: "cola"},
       });
-      const layout = cy.layout({name:"cola"});
 
       const driver = neo4j.driver(
               "bolt://localhost",
               neo4j.auth.basic("neo4j", "helios")
       );
       const result = {};
+      let source_id = "";
       const session = driver.session({ defaultAccessMode: neo4j.session.READ });
       session
               .run(`MATCH p = (a:Product {id:4294424})-[:CONTAINS*4..4]-(b:Product)
@@ -95,6 +115,7 @@ LIMIT 100`, {product:4294424})
                     node: p.end.properties,
                     path: p.segments,
                   };
+                  source_id = p.start.elementId;
                 },
                 onCompleted: () => {
                   const nodes = {};
@@ -115,6 +136,7 @@ LIMIT 100`, {product:4294424})
                     nodes[eid].is_end = true;
                     nodes[eid].label = "Product";
                   }
+                  nodes[source_id].is_start = true;
                   const add = [];
                   for (const [id, n] of Object.entries(nodes)) {
                     let data = n;
@@ -124,9 +146,10 @@ LIMIT 100`, {product:4294424})
                   for (const [eid, e] of Object.entries(edges)) {
                     add.push({group: "edges", data: {id: eid, source: e.start, target: e.end}})
                   }
+                  console.log(add);
 
                   cy.add(add);
-                  layout.run();
+                  cy.layout({name:"cola"}).run();
                 },
               });
     </script>

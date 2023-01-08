@@ -41,6 +41,8 @@ Vue.component("Info", {
   methods: {
     onPicked(picked) {
       this.actionType = picked;
+
+      window.dispatchEvent(new Event("resize"));
     },
     onFormSubmit(formData) {
       this.actionType = formData.picked;
@@ -126,9 +128,9 @@ Vue.component("Info", {
       <h1>Círculo de Hadas App</h1>
       <div class="views">
         <input type="radio" id="map_view" value="map_view" v-model="picked_view" />
-        <label for="map_view" :class="picked_view=='map_view'?'active':''">Map View</label>
+        <label for="map_view" :class="picked_view=='map_view'?'active':''">Regional Data</label>
         <input type="radio" id="graph_view" value="graph_view" v-model="picked_view" />
-        <label for="graph_view" :class="picked_view=='graph_view'?'active':''">Graph View</label>
+        <label for="graph_view" :class="picked_view=='graph_view'?'active':''">Related Product</label>
       </div>
     </header>
     <div v-show="picked_view=='map_view'" class="main-map-view-container">
